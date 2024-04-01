@@ -14,8 +14,9 @@ $(MOZILLA_UNIFIED):
 	curl -LO 'https://hg.mozilla.org/mozilla-central/raw-file/default/python/mozboot/bin/bootstrap.py'
 	python3 bootstrap.py --vcs=git --application-choice="Firefox for Desktop"
 	rm -f bootstrap.py
+	(cd $(MOZILLA_UNIFIED) && ./mach bootstrap --application-choice="Firefox for Desktop")
 
-configure: $(MOZILLA_UNIFIED)
+configure: $(MOZILLA_UNIFIED) $(PDF_JS)
 	@echo ">>> Configuring mozilla-unified"
 	@# Update moz.yaml to point to our pdf.js fork
 	git -C $(MOZILLA_UNIFIED) reset --hard origin/bookmarks/central
@@ -82,6 +83,7 @@ pdfjs: $(PDF_JS)
 
 clean:
 	(cd $(MOZILLA_UNIFIED) && ./mach clobber)
+	(cd $(PDF_JS) && rm -rf build)
 
 distclean:
 	rm -rf bootstrap.py $(CURDIR)/mozilla-unified $(CURDIR)/pdf.js

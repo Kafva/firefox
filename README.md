@@ -1,5 +1,5 @@
 # firefox
-Build Firefox with patches and a custom pdf.js version on Linux and macOS.
+Build Firefox with patches and a custom pdf.js version on (Arch) Linux and macOS.
 
 * Basic requirements:
     - python3
@@ -13,6 +13,9 @@ Build Firefox with patches and a custom pdf.js version on Linux and macOS.
 
 ## Arch
 ```bash
+rustup default 1.74.0
+rustup target add wasm32-unknown-unknown
+
 paru -S git-cinnabar
-sudo pacman -S wasi-compiler-rt wasi-libc wasi-libc++ wasi-libc++abi
+sudo pacman -S wasi-compiler-rt wasi-libc wasi-libc++ wasi-libc++abi cbindgen
 ```
