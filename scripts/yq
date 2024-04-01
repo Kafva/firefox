@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+require 'yaml'
+require 'optparse'
+require 'pathname'
+require 'json'
+
+def die msg
+    warn msg
+    exit 1
+end
+
+new_value = nil
+keypath = nil
+
+PARSER = OptionParser.new do |opts|
+    opts.banner =  "usage: #{Pathname.new($0).basename} [flags] [file]
+
+Note: Updating a value strips away all comments.
+
+OPTIONS:
+".freeze
+    opts.on('-pPATH', '--path=PATH', 'Path in YAML') do |v|
+        keypath = v
+    end
+    opts.on('-sVALUE', '--set=VALUE', 'Set value') do |v|
+        new_value = v
+    end
+end
+
+begin
+    PARSER.parse!
+rescue StandardError => e
+    puts e.message, PARSER.help
+    exit 1
+end
+
+die PARSER.help if keypath.nil?
+
+yaml = YAML.load(ARGF.read)
+subyaml = yaml
+
+keys = keypath.split('.')
+keys.each_with_index do |key, i|
+    if i == keys.length - 1
+        if new_value.nil?
+            # Dump value at path
+            if subyaml[key].is_a? Hash
+                puts subyaml[key].to_json
+            else
+                puts subyaml[key]
+            end
+        else
+            # Update value at path
+            subyaml[key] = new_value
+        end
+
+    elsif subyaml[key].is_a? Hash
+        subyaml = subyaml[key]
+    else
+        die "Not found: '#{keypath}'"
+    end
+end
+
+unless new_value.nil?
+    if ARGF.filename == '-'
+        puts yaml.to_yaml
+    else
+        File.write ARGF.filename, yaml.to_yaml
+    end
+end
