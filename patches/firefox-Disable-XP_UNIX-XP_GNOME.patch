@@ -1,0 +1,41 @@
+From 42e77c893805fbdef968f127e502ada3ee6edfeb Mon Sep 17 00:00:00 2001
+From: Kafva <36083692+Kafva@users.noreply.github.com>
+Date: Sat, 23 Sep 2023 18:05:06 +0200
+Subject: [PATCH 1/1] Disable: XP_UNIX => XP_GNOME
+
+The modifier used to switch tabs etc. can be changed from user.js in 'ui.accelKey' but
+the modifier for switching tab by index is decided at compile time:
+
+    #ifdef XP_GNOME
+        #define NUM_SELECT_TAB_MODIFIER alt
+    #else
+        #define NUM_SELECT_TAB_MODIFIER accel
+    #endif
+
+To avoid this, do not set XP_GNOME if we have XP_UNIX.
+
+Note: if vimium is in use, tab switching can require an exception for [1-9].
+---
+ browser/base/content/browser-sets.inc | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/browser/base/content/browser-sets.inc b/browser/base/content/browser-sets.inc
+index 671c786b2ab95..70dd6d37dfe19 100644
+--- a/browser/base/content/browser-sets.inc
++++ b/browser/base/content/browser-sets.inc
+@@ -3,12 +3,6 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-#ifdef XP_UNIX
+-#ifndef XP_MACOSX
+-#define XP_GNOME 1
+-#endif
+-#endif
+-
+   <stringbundleset id="stringbundleset">
+     <stringbundle id="bundle_brand" src="chrome://branding/locale/brand.properties"/>
+     <stringbundle id="bundle_shell" src="chrome://browser/locale/shellservice.properties"/>
+-- 
+2.42.0
+

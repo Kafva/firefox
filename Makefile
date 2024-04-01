@@ -15,10 +15,14 @@ $(MOZILLA_UNIFIED):
 	python3 bootstrap.py --vcs=git --application-choice="Firefox for Desktop"
 	rm -f bootstrap.py
 
-configure: $(MOZILLA_UNIFIED) pdfjs
+configure: $(MOZILLA_UNIFIED)
 	@echo ">>> Configuring mozilla-unified"
 	@# Update moz.yaml to point to our pdf.js fork
 	git -C $(MOZILLA_UNIFIED) reset --hard origin/bookmarks/central
+	@# Apply mozilla-unified patches
+	for patch in $(CURDIR)/patches/*.patch; do \
+		git -C $(MOZILLA_UNIFIED) am $$patch; \
+	done
 	$(CURDIR)/scripts/yq \
 		-p origin.url \
 		-s "$(PDF_JS_URL)" \
