@@ -9,3 +9,10 @@ Build Firefox with patches and a custom pdf.js version on Linux and macOS.
 * pdf.js requirements
     - npm
     - gulp-cli
+
+
+## Arch
+```bash
+paru -S git-cinnabar
+sudo pacman -S wasi-compiler-rt wasi-libc wasi-libc++ wasi-libc++abi
+```
