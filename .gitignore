@@ -1,5 +1,6 @@
 # vi: ft=gitignore
 
+/out
 /bootstrap.py
 /mozilla-unified
 /pdf.js

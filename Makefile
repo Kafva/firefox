@@ -65,6 +65,7 @@ endif
 
 build: $(MOZILLA_UNIFIED)/mozconfig configure
 	(cd $(MOZILLA_UNIFIED) && ./mach build)
+	(cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install)
 
 #== pdf.js ====================================================================#
 $(PDF_JS):
