@@ -1,10 +1,9 @@
 include config.mk
 
-source: $(MOZILLA_UNIFIED) \
-	    $(PDF_JS)
-
 all: build 
 
+source: $(MOZILLA_UNIFIED) \
+	    $(PDF_JS)
 
 #== firefox ===================================================================#
 $(MOZILLA_UNIFIED):
