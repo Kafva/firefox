@@ -5,6 +5,8 @@ MOZILLA_UNIFIED := $(CURDIR)/mozilla-unified
 PDF_JS          := $(CURDIR)/pdf.js
 PDF_JS_MOZ_YAML := $(MOZILLA_UNIFIED)/toolkit/components/pdfjs/moz.yaml
 NPM             := npm
+# Name of builder image, different tags for different distros.
+IMAGE_NAME      := firefox-builder
 
 UNAME		    := $(shell uname -s)
 

@@ -2,14 +2,9 @@
 Build Firefox with patches and a custom pdf.js version on Linux and macOS.
 
 ## Linux
-1. Build in podman for your distro:
+1. Build in podman for your distro (ubuntu or archlinux):
 ```bash
-# Ubuntu
-podman build -f docker/ubuntu.dockerfile -t firefox-builder:ubuntu &&
-    podman run --rm -v $PWD:/firefox firefox-builder:ubuntu
-# Arch
-podman build -f docker/archlinux.dockerfile -t firefox-builder:archlinux &&
-    podman run --rm -v $PWD:/firefox firefox-builder:archlinux
+make $DISTRO
 ```
 
 2. Install runtime dependencies
@@ -19,7 +14,7 @@ sudo pacman -S dbus-glib
 ```
 
 ## macOS
-TODO
+1. Setup a macOS VM, I recommend using [quickemu](https://github.com/quickemu-project/quickemu)
 
 
 ## Development notes for mozilla-unified

@@ -5,7 +5,31 @@ all: build
 source: $(MOZILLA_UNIFIED) \
 	    $(PDF_JS)
 
-#== firefox ===================================================================#
+# $1: Distribution name
+# $2: Extra podman flags
+define podman_run
+	podman build \
+		--build-arg LOCAL_UID=$(shell id -u) \
+		--build-arg LOCAL_GID=$(shell id -g) \
+		-f docker/${1}.dockerfile -t $(IMAGE_NAME):${1}
+	podman run --userns keep-id --rm \
+		${2} \
+		--mount type=bind,src=$(CURDIR),dst=/home/builder/firefox,ro=false \
+		$(IMAGE_NAME):${1}
+endef
+
+### containers #################################################################
+ubuntu: docker/ubuntu.dockerfile
+	$(call podman_run,ubuntu)
+
+ubuntu-shell: docker/ubuntu.dockerfile
+	$(call podman_run,ubuntu,-it --entrypoint /bin/bash)
+
+archlinux: docker/archlinux.dockerfile
+	@echo TODO
+
+
+### firefox ####################################################################
 $(MOZILLA_UNIFIED):
 	@echo ">>> Fetching firefox source"
 	@echo ">>> NOTE: bootstrap.py will prompt for interactive input"
@@ -73,7 +97,7 @@ endif
 	@echo ">>> Done"
 	@echo "sudo cp -r $(OUT)/firefox-nightly/usr /usr"
 
-#== pdf.js ====================================================================#
+### pdf.js #####################################################################
 $(PDF_JS):
 	git clone $(PDF_JS_URL) $@
 
@@ -86,7 +110,7 @@ pdfjs: $(PDF_JS)
 		gulp mozcentral)
 
 
-#==============================================================================#
+################################################################################
 
 clean:
 	(cd $(MOZILLA_UNIFIED) && ./mach clobber)
