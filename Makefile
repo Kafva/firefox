@@ -15,14 +15,20 @@ $(MOZILLA_UNIFIED):
 	rm -f bootstrap.py
 	(cd $(MOZILLA_UNIFIED) && ./mach bootstrap --application-choice="Firefox for Desktop")
 
-configure: $(MOZILLA_UNIFIED) $(PDF_JS)
+configure: $(MOZILLA_UNIFIED)
 	@echo ">>> Configuring mozilla-unified"
 	@# Update moz.yaml to point to our pdf.js fork
 	git -C $(MOZILLA_UNIFIED) reset --hard origin/bookmarks/central
+	git -C $(MOZILLA_UNIFIED) config --local commit.gpgsign false
+	@# Cleanup from previous failures
+	git -C $(MOZILLA_UNIFIED) am --abort || :
 	@# Apply mozilla-unified patches
 	for patch in $(CURDIR)/patches/*.patch; do \
 		git -C $(MOZILLA_UNIFIED) am $$patch; \
 	done
+
+configure-pdfjs: $(PDF_JS)
+	@echo ">>> Configuring pdf.js for mozilla-unified"
 	$(CURDIR)/scripts/yq \
 		-p origin.url \
 		-s "$(PDF_JS_URL)" \
@@ -52,19 +58,19 @@ configure: $(MOZILLA_UNIFIED) $(PDF_JS)
 	cd $(MOZILLA_UNIFIED)/toolkit/components/pdfjs && \
 		PDFJS_CHECKOUT=$(PDF_JS) GECKO_PATH=$(MOZILLA_UNIFIED) \
 			./update.sh "$(shell git -C $(PDF_JS) rev-parse HEAD)"
-	@echo "update.sh: OK"
+	@echo ">>> update.sh done"
 
-$(MOZILLA_UNIFIED)/mozconfig: $(MOZILLA_UNIFIED)
+build: configure configure-pdfjs
 	@# Add our mozconfig
 ifeq ($(UNAME),Darwin)
 	cp $(CURDIR)/conf/mozconfig_darwin $(MOZILLA_UNIFIED)/mozconfig
 else
 	cp $(CURDIR)/conf/mozconfig_linux $(MOZILLA_UNIFIED)/mozconfig
 endif
-
-build: $(MOZILLA_UNIFIED)/mozconfig configure
 	(cd $(MOZILLA_UNIFIED) && ./mach build)
 	(cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install)
+	@echo ">>> Done"
+	@echo "sudo cp -r $(OUT)/firefox-nightly/usr /usr"
 
 #== pdf.js ====================================================================#
 $(PDF_JS):
