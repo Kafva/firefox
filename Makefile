@@ -67,6 +67,7 @@ ifeq ($(UNAME),Darwin)
 else
 	cp $(CURDIR)/conf/mozconfig_linux $(MOZILLA_UNIFIED)/mozconfig
 endif
+	mkdir -p $(OUT)
 	(cd $(MOZILLA_UNIFIED) && ./mach build)
 	(cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install)
 	@echo ">>> Done"
