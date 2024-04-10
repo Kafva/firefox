@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     libdbus-glib-1-dev \
+    libasound2-dev \
     libgtk-3-dev \
     libpulse-dev \
     libxt-dev \
@@ -20,9 +21,14 @@ RUN apt-get update && apt-get install -y \
     zip \
     make \
     ruby \
-    nodejs \
-    npm \
+    ccache \
+    lld \
     rsync
+
+# TODO install rust
+
+# The nodejs version in 22.04 is to old
+RUN curl "https://nodejs.org/dist/v20.12.1/node-v20.12.1-linux-x64.tar.xz" | tar -xJf - -C /usr --strip-components=1
 
 # For building pdf.js
 RUN npm install -g gulp-cli
@@ -31,8 +37,6 @@ RUN npm install -g gulp-cli
 RUN groupadd -g ${LOCAL_GID} _builder_podman
 RUN useradd --uid ${LOCAL_UID} --gid ${LOCAL_GID} --create-home --shell /bin/bash builder
 USER builder
-
-# TODO use newer nodejs
 
 # TODO handle interactive prompts from bootstrap.sh...
 RUN git config --global user.email "builder@mozilla.org"
