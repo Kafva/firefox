@@ -23,7 +23,7 @@ ubuntu: docker/ubuntu.dockerfile
 	$(call podman_run,ubuntu)
 
 ubuntu-shell: docker/ubuntu.dockerfile
-	$(call podman_run,ubuntu,-it --entrypoint /bin/bash)
+	$(call podman_run,ubuntu,-u root -it --entrypoint /bin/bash)
 
 archlinux: docker/archlinux.dockerfile
 	@echo TODO

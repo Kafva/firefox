@@ -1,24 +1,45 @@
 FROM docker.io/archlinux:latest
 
-RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm \
-    base-devel \
-    clang \
-    git \
-    python \
-    curl \
-    dbus-glib \
-    gtk3 \
-    pulseaudio \
-    mercurial \
-    zip \
-    make
-    ruby
+ARG BUILDER_UID=${BUILDER_UID:-1000}
+ARG BUILDER_GID=${BUILDER_GID:-1000}
 
-WORKDIR /firefox
-VOLUME /firefox
+RUN pacman -Syu --noconfirm base-devel \
+                            clang \
+                            rustup \
+                            nodejs \
+                            npm \
+                            git \
+                            python \
+                            curl \
+                            dbus-glib \
+                            gtk3 \
+                            pulseaudio \
+                            mercurial \
+                            zip \
+                            make \
+                            ruby \
+                            ccache \
+                            lld \
+                            rsync \
+                            wasi-compiler-rt \
+                            wasi-libc wasi-libc++ \
+                            wasi-libc++abi
+
+RUN cargo install cbindgen
+
+
+# For building pdf.js
+RUN npm install -g gulp-cli
+
+# Create build user with matching UID/GID to outside user
+RUN groupadd -g ${BUILDER_GID} _builder_podman
+RUN useradd --uid ${BUILDER_UID} --gid ${BUILDER_GID} --create-home --shell /bin/bash builder
+USER builder
+WORKDIR /home/builder/firefox
+VOLUME /home/builder/firefox
 
 RUN git config --global user.email "builder@mozilla.org"
 RUN git config --global user.name "builder"
 
-ENTRYPOINT ["make", "clean", "build"] 
+ENTRYPOINT ["make", "clean", "build"]
+

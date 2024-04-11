@@ -14,21 +14,17 @@ sudo pacman -S dbus-glib
 ```
 
 ## macOS
-1. Setup a macOS VM, I recommend using [quickemu](https://github.com/quickemu-project/quickemu)
+This guide describes how to cross compile from x86_64 to arm64, I recommend
+using [quickemu](https://github.com/quickemu-project/quickemu) to create the
+build machine if you do not have a powerful x86_64 mac lying around.
 
 
 ## Development notes for mozilla-unified
-Build setup outside container on Arch:
-```bash
-rustup default 1.74.0
-rustup target add wasm32-unknown-unknown
-
-paru -S git-cinnabar
-sudo pacman -S wasi-compiler-rt wasi-libc wasi-libc++ wasi-libc++abi cbindgen
-```
-
 Useful commands:
 ```bash
+# For working outside the container on Arch
+paru -S git-cinnabar
+
 # (clean)
 ./mach clobber
 

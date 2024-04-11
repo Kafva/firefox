@@ -11,7 +11,10 @@ RUN apt-get update && apt-get install -y \
     clang \
     curl \
     git \
+    nasm \
+    m4 \
     libdbus-glib-1-dev \
+    libx11-xcb-dev \
     libasound2-dev \
     libgtk-3-dev \
     libpulse-dev \
@@ -23,20 +26,7 @@ RUN apt-get update && apt-get install -y \
     ruby \
     ccache \
     lld \
-    rsync \
-    cbindgen
-
-# Install rust
-WORKDIR /tmp
-RUN curl -sO "https://static.rust-lang.org/dist/rust-1.77.2-x86_64-unknown-linux-gnu.tar.xz"
-RUN curl -sO "https://static.rust-lang.org/dist/rust-1.77.2-x86_64-unknown-linux-gnu.tar.xz.asc"
-RUN curl -s "https://static.rust-lang.org/rust-key.gpg.ascii" | gpg --import -
-RUN gpg --verify "rust-1.77.2-x86_64-unknown-linux-gnu.tar.xz.asc"
-RUN tar -Jxf rust-1.77.2-x86_64-unknown-linux-gnu.tar.xz
-RUN (cd "rust-1.77.2-x86_64-unknown-linux-gnu" && ./install.sh)
-RUN rm -r "rust-1.77.2-x86_64-unknown-linux-gnu" \
-          "rust-1.77.2-x86_64-unknown-linux-gnu.tar.xz" \
-          "rust-1.77.2-x86_64-unknown-linux-gnu.tar.xz.asc"
+    rsync
 
 # The nodejs version in 22.04 is to old
 RUN curl "https://nodejs.org/dist/v20.12.1/node-v20.12.1-linux-x64.tar.xz" | tar -xJf - -C /usr --strip-components=1
@@ -48,12 +38,21 @@ RUN npm install -g gulp-cli
 RUN groupadd -g ${BUILDER_GID} _builder_podman
 RUN useradd --uid ${BUILDER_UID} --gid ${BUILDER_GID} --create-home --shell /bin/bash builder
 USER builder
+WORKDIR /home/builder/firefox
+VOLUME /home/builder/firefox
+
+# Install rust with wasm32 support and cbindgen
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    bash -s -- -y \
+               -t wasm32-unknown-unknown \
+               --default-host x86_64-unknown-linux-gnu \
+               --default-toolchain stable
+
+RUN echo "export PATH=\$PATH:$HOME/.cargo/bin" >> ~/.bashrc
+RUN "$HOME/.cargo/bin/cargo" install cbindgen
 
 # TODO handle interactive prompts from bootstrap.sh...
 RUN git config --global user.email "builder@mozilla.org"
 RUN git config --global user.name "builder"
-
-WORKDIR /home/builder/firefox
-VOLUME /home/builder/firefox
 
 ENTRYPOINT ["make", "clean", "build"]
