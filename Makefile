@@ -9,8 +9,8 @@ source: $(MOZILLA_UNIFIED) \
 # $2: Extra podman flags
 define podman_run
 	podman build \
-		--build-arg LOCAL_UID=$(shell id -u) \
-		--build-arg LOCAL_GID=$(shell id -g) \
+		--build-arg BUILDER_UID=$(shell id -u) \
+		--build-arg BUILDER_GID=$(shell id -g) \
 		-f docker/${1}.dockerfile -t $(IMAGE_NAME):${1}
 	podman run --userns keep-id --rm \
 		${2} \
