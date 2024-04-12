@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y \
     libgtk-3-dev \
     libpulse-dev \
     libxt-dev \
-    mercurial \
     python3 \
     zip \
     make \
@@ -41,7 +40,7 @@ USER builder
 WORKDIR /home/builder/firefox
 VOLUME /home/builder/firefox
 
-# Install rust with wasm32 support and cbindgen
+# Install rust with wasm32 support, cbindgen and git-cinnabar
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
     bash -s -- -y \
                -t wasm32-unknown-unknown \
@@ -49,7 +48,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
                --default-toolchain stable
 
 RUN echo "export PATH=\$PATH:$HOME/.cargo/bin" >> ~/.bashrc
-RUN "$HOME/.cargo/bin/cargo" install cbindgen
+RUN "$HOME/.cargo/bin/cargo" install cbindgen git-cinnabar
 
 # TODO handle interactive prompts from bootstrap.sh...
 RUN git config --global user.email "builder@mozilla.org"

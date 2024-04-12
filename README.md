@@ -21,21 +21,22 @@ You need at least 64 GB of disk. Setup from a fresh install:
 
 0. Install Xcode command line tools: `xcode-select --install`
 1. Install brew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-2. Install Xcode, can be downloaded from [here](https://xcodereleases.com/)
+2. Install Xcode (tested with 15.3 on Ventura), can be downloaded from [here](https://xcodereleases.com/)
 ```bash
-xip -d /Applications # TODO
+(cd /Applications && xip --expand ~/Downloads/Xcode_15.3.xip)
 
 sudo xcode-select --switch /Applications/Xcode.app
 sudo xcodebuild -license
+```
+3. Install build dependencies (some basic build packages are not listed)
+```bash
+brew install git-cinnabar
 ```
 
 
 ## Development notes for mozilla-unified
 Useful commands:
 ```bash
-# For working outside the container on Arch
-paru -S git-cinnabar
-
 # (clean)
 ./mach clobber
 

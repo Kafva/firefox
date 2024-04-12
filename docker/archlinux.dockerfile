@@ -15,7 +15,6 @@ RUN pacman -Syu --noconfirm base-devel \
                             dbus-glib \
                             gtk3 \
                             pulseaudio \
-                            mercurial \
                             zip \
                             make \
                             ruby \
@@ -26,7 +25,7 @@ RUN pacman -Syu --noconfirm base-devel \
                             wasi-libc wasi-libc++ \
                             wasi-libc++abi
 
-RUN cargo install cbindgen
+RUN cargo install cbindgen git-cinnabar
 
 
 # For building pdf.js

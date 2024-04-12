@@ -34,15 +34,13 @@ $(MOZILLA_UNIFIED):
 	@echo ">>> Fetching firefox source"
 	@echo ">>> NOTE: bootstrap.py will prompt for interactive input"
 	python3 -m pip install --user mercurial
-	curl -LO 'https://hg.mozilla.org/mozilla-central/raw-file/default/python/mozboot/bin/bootstrap.py'
-	python3 bootstrap.py --vcs=git --application-choice="Firefox for Desktop"
-	rm -f bootstrap.py
+	git clone -b $(MOZILLA_UNIFIED_BRANCH) hg::$(MOZILLA_UNIFIED_URL)
 	(cd $(MOZILLA_UNIFIED) && ./mach bootstrap --application-choice="Firefox for Desktop")
 
 configure: $(MOZILLA_UNIFIED)
 	@echo ">>> Configuring mozilla-unified"
 	@# Update moz.yaml to point to our pdf.js fork
-	git -C $(MOZILLA_UNIFIED) reset --hard origin/bookmarks/central
+	git -C $(MOZILLA_UNIFIED) reset --hard origin/$(MOZILLA_UNIFIED_BRANCH)
 	git -C $(MOZILLA_UNIFIED) config --local commit.gpgsign false
 	@# Cleanup from previous failures
 	git -C $(MOZILLA_UNIFIED) am --abort || :
@@ -86,10 +84,11 @@ configure-pdfjs: $(PDF_JS)
 
 build: configure configure-pdfjs
 	@# Add our mozconfig
+	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
 ifeq ($(UNAME),Darwin)
-	cp $(CURDIR)/conf/mozconfig_darwin $(MOZILLA_UNIFIED)/mozconfig
+	cat $(CURDIR)/conf/mozconfig_darwin >> $(MOZILLA_UNIFIED)/mozconfig
 else
-	cp $(CURDIR)/conf/mozconfig_linux $(MOZILLA_UNIFIED)/mozconfig
+	cat $(CURDIR)/conf/mozconfig_linux >> $(MOZILLA_UNIFIED)/mozconfig
 endif
 	mkdir -p $(OUT)
 	(cd $(MOZILLA_UNIFIED) && ./mach build)
@@ -105,7 +104,7 @@ $(PDF_JS):
 pdfjs: $(PDF_JS)
 	@echo '>>> Building pdf.js'
 	(cd pdf.js && \
-		$(NPM) install --legacy-peer-deps --ignore-scripts)
+		npm install --legacy-peer-deps --ignore-scripts)
 	(cd pdf.js && \
 		gulp mozcentral)
 

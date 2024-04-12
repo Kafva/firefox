@@ -1,38 +1,11 @@
-unset MOZ_TELEMETRY_REPORTING
-
-# For correct WM_CLASS
-#   https://bugzilla.mozilla.org/show_bug.cgi?id=1530052
-# This gets used in widget/gtk/nsAppShell.cpp
-#
-export MOZ_APP_REMOTINGNAME=firefox-nightly
-
-mk_add_options MOZ_PARALLEL_BUILD=10
 mk_add_options 'export CCACHE_CPP2=yes'
 ac_add_options --with-ccache
+ac_add_options --prefix=/usr
 
+# Enable audio support
+ac_add_options --enable-alsa
 
-ac_add_options --with-branding=browser/branding/nightly
-ac_add_options --enable-release
-ac_add_options --enable-hardening
-ac_add_options --enable-optimize
-ac_add_options --enable-rust-simd
-ac_add_options --enable-linker=lld
-ac_add_options --without-wasm-sandboxed-libraries
-
-# Disable:
+# Disable unused features
 ac_add_options --disable-necko-wifi
 ac_add_options --disable-dbus
-ac_add_options --disable-tests
-ac_add_options --disable-crashreporter
-ac_add_options --disable-updater
 ac_add_options --disable-elf-hack
-ac_add_options --disable-bootstrap
-ac_add_options --disable-debug
-ac_add_options --disable-debug-symbols
-
-
-ac_add_options --prefix=/usr
-ac_add_options --enable-application=browser
-ac_add_options --with-unsigned-addon-scopes=app,system
-ac_add_options --allow-addon-sideload
-ac_add_options --enable-alsa
