@@ -23,22 +23,29 @@ powerful mac lying around, I recommend using
 machine. This setup is configured to cross compile from x86_64 to arm64.
 You need at least 64 GB of disk. Setup from a fresh install:
 
-0. Install Xcode command line tools: `xcode-select --install`
-1. Install brew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-2. Install Xcode (tested with 15.3 on Ventura), can be downloaded from [here](https://xcodereleases.com/)
+1. Setup Xcode (tested with 15.3 on Ventura), can be downloaded from [here](https://xcodereleases.com/)
 ```bash
+xcode-select --install
+
 (cd /Applications && xip --expand ~/Downloads/Xcode_15.3.xip)
 
 sudo xcode-select --switch /Applications/Xcode.app
 sudo xcodebuild -license
 ```
-3. Install build dependencies
+
+2. Install build dependencies
 ```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew bundle install --file conf/Brewfile
+
+# Setup rust 
 ./scripts/rustup.sh
+
+# For building pdf.js
 npm install -g gulp-cli
 ```
-4. Build
+
+3. Build
 ```bash
 make
 ```
