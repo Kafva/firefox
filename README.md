@@ -19,9 +19,8 @@ sudo pacman -S dbus-glib
 Building Firefox requires a fairly powerful machine, if you do not have a
 powerful mac lying around, I recommend using
 [quickemu](https://github.com/quickemu-project/quickemu) to create the build
-machine. The default settings in `mozconfig_darwin` will compile for an arm64
-target, this works fine when compiling on a x86_64 VM. You need at least 64 GB
-of disk. Setup from a fresh install:
+machine. This setup is configured to cross compile from x86_64 to arm64.
+You need at least 64 GB of disk. Setup from a fresh install:
 
 0. Install Xcode command line tools: `xcode-select --install`
 1. Install brew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
@@ -35,6 +34,7 @@ sudo xcodebuild -license
 3. Install build dependencies
 ```bash
 brew bundle install --file conf/Brewfile
+./docker/setup-user.sh
 ```
 4. Build
 ```bash

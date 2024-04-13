@@ -5,7 +5,6 @@ ARG BUILDER_GID=${BUILDER_GID:-1000}
 
 RUN pacman -Syu --noconfirm base-devel \
                             clang \
-                            rustup \
                             nodejs \
                             npm \
                             git \
@@ -19,6 +18,7 @@ RUN pacman -Syu --noconfirm base-devel \
                             make \
                             ruby \
                             ccache \
+                            lsb-release \
                             lld \
                             rsync \
                             wasi-compiler-rt \
