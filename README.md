@@ -28,9 +28,9 @@ You need at least 64 GB of disk. Setup from a fresh install:
 sudo xcode-select --switch /Applications/Xcode.app
 sudo xcodebuild -license
 ```
-3. Install build dependencies (some basic build packages are not listed)
+3. Install build dependencies
 ```bash
-brew install git-cinnabar
+brew bundle install --file conf/Brewfile
 ```
 
 

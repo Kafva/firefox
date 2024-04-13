@@ -1,6 +1,6 @@
 include config.mk
 
-all: build 
+all: build
 
 source: $(MOZILLA_UNIFIED) \
 	    $(PDF_JS)
@@ -26,14 +26,14 @@ ubuntu-shell: docker/ubuntu.dockerfile
 	$(call podman_run,ubuntu,-u root -it --entrypoint /bin/bash)
 
 archlinux: docker/archlinux.dockerfile
-	@echo TODO
+	$(call podman_run,archlinux)
 
+archlinux-shell: docker/archlinux.dockerfile
+	$(call podman_run,archlinux,-u root -it --entrypoint /bin/bash)
 
 ### firefox ####################################################################
 $(MOZILLA_UNIFIED):
 	@echo ">>> Fetching firefox source"
-	@echo ">>> NOTE: bootstrap.py will prompt for interactive input"
-	python3 -m pip install --user mercurial
 	git clone -b $(MOZILLA_UNIFIED_BRANCH) hg::$(MOZILLA_UNIFIED_URL)
 	(cd $(MOZILLA_UNIFIED) && ./mach bootstrap --application-choice="Firefox for Desktop")
 

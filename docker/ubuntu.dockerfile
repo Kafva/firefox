@@ -34,24 +34,14 @@ RUN curl "https://nodejs.org/dist/v20.12.1/node-v20.12.1-linux-x64.tar.xz" | tar
 RUN npm install -g gulp-cli
 
 # Create build user with matching UID/GID to outside user
-RUN groupadd -g ${BUILDER_GID} _builder_podman
+RUN groupadd -g ${BUILDER_GID} _builder_podman || :
 RUN useradd --uid ${BUILDER_UID} --gid ${BUILDER_GID} --create-home --shell /bin/bash builder
 USER builder
 WORKDIR /home/builder/firefox
 VOLUME /home/builder/firefox
 
-# Install rust with wasm32 support, cbindgen and git-cinnabar
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-    bash -s -- -y \
-               -t wasm32-unknown-unknown \
-               --default-host x86_64-unknown-linux-gnu \
-               --default-toolchain stable
-
-RUN echo "export PATH=\$PATH:$HOME/.cargo/bin" >> ~/.bashrc
-RUN "$HOME/.cargo/bin/cargo" install cbindgen git-cinnabar
-
-# TODO handle interactive prompts from bootstrap.sh...
-RUN git config --global user.email "builder@mozilla.org"
-RUN git config --global user.name "builder"
+# Setup the builder user
+COPY setup-user.sh .
+RUN ./setup-user.sh
 
 ENTRYPOINT ["make", "clean", "build"]
