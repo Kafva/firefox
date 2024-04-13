@@ -2,8 +2,8 @@
 PDF_JS_URL ?= https://github.com/kafva/pdf.js
 # URL to clone mozilla-unified from
 MOZILLA_UNIFIED_URL ?= https://hg.mozilla.org/mozilla-unified
-# Branch of mozilla-unified to use
-MOZILLA_UNIFIED_BRANCH ?= bookmarks/release
+# Branch/tag of mozilla-unified to use
+MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_125_END
 
 MOZILLA_UNIFIED := $(CURDIR)/mozilla-unified
 PDF_JS          := $(CURDIR)/pdf.js

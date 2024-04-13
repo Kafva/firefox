@@ -34,7 +34,9 @@ archlinux-shell: docker/archlinux.dockerfile
 ### firefox ####################################################################
 $(MOZILLA_UNIFIED):
 	@echo ">>> Fetching firefox source"
-	git clone -b $(MOZILLA_UNIFIED_BRANCH) hg::$(MOZILLA_UNIFIED_URL)
+	git clone hg::$(MOZILLA_UNIFIED_URL)
+	git -C $(MOZILLA_UNIFIED) cinnabar fetch --tags
+	git -C $(MOZILLA_UNIFIED) checkout $(MOZILLA_UNIFIED_REV)
 	(cd $(MOZILLA_UNIFIED) && ./mach bootstrap --application-choice="Firefox for Desktop")
 
 configure: $(MOZILLA_UNIFIED)
@@ -44,7 +46,7 @@ configure: $(MOZILLA_UNIFIED)
 	git -C $(MOZILLA_UNIFIED) config --local fetch.prune true
 	git -C $(MOZILLA_UNIFIED) config --local commit.gpgsign false
 	@# Update moz.yaml to point to our pdf.js fork
-	git -C $(MOZILLA_UNIFIED) reset --hard origin/$(MOZILLA_UNIFIED_BRANCH)
+	git -C $(MOZILLA_UNIFIED) reset --hard $(MOZILLA_UNIFIED_REV)
 	@# Cleanup from previous failures
 	git -C $(MOZILLA_UNIFIED) am --abort 2> /dev/null || :
 	@# Apply mozilla-unified patches
