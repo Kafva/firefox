@@ -85,10 +85,12 @@ configure-pdfjs: $(PDF_JS)
 build: configure configure-pdfjs
 	@# Add our mozconfig
 	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
-ifeq ($(UNAME),Darwin)
+ifeq ($(UNAME),Linux)
 	cat $(CURDIR)/conf/mozconfig_darwin >> $(MOZILLA_UNIFIED)/mozconfig
-else
+else ifeq ($(UNAME),Darwin)
 	cat $(CURDIR)/conf/mozconfig_linux >> $(MOZILLA_UNIFIED)/mozconfig
+else
+	$(error Unsupported platform $(UNAME))
 endif
 	mkdir -p $(OUT)
 	(cd $(MOZILLA_UNIFIED) && ./mach build)

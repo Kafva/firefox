@@ -11,18 +11,22 @@ PDF_JS_MOZ_YAML := $(MOZILLA_UNIFIED)/toolkit/components/pdfjs/moz.yaml
 # Name of builder image, different tags for different distros.
 IMAGE_NAME      := firefox-builder
 
-UNAME		    := $(shell uname -s)
+UNAME := $(shell uname -s)
 
 ifeq ($(UNAME),Linux)
-# Separate output directories for different build targets, allows us to build
-# with podman from one host.
-OUT             := $(CURDIR)/out/$(shell lsb_release -si)
+	# Separate output directories for different build targets, allows us to build
+	# with podman from one host.
+	OUT := $(CURDIR)/out/$(shell lsb_release -si)
+	export MOZ_PARALLEL_BUILD ?= $(shell nproc)
+
+else ifeq ($(UNAME),Darwin)
+	OUT := $(CURDIR)/out/$(UNAME)
+	export MOZ_PARALLEL_BUILD ?= $(shell sysctl -n hw.logicalcpu)
+
 else
-OUT             := $(CURDIR)/out/$(UNAME)
+	$(error Unsupported platform $(UNAME))
 endif
 
-# mozilla-unified build options
-export MOZ_PARALLEL_BUILD ?= $(shell nproc)
 export MOZ_OBJDIR ?= $(MOZILLA_UNIFIED)/obj
 export RUSTC ?= ~/.cargo/bin/rustc
 export CARGO ?= ~/.cargo/bin/cargo
