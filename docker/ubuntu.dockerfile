@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y \
     clang \
     curl \
     git \
-    nasm \
     mercurial \
+    nasm \
     m4 \
     libdbus-glib-1-dev \
     libx11-xcb-dev \
@@ -21,18 +21,24 @@ RUN apt-get update && apt-get install -y \
     libpulse-dev \
     libxt-dev \
     python3 \
+    python3-dev \
+    python3-pip \
     zip \
     make \
     ruby \
     ccache \
     lld \
-    rsync
+    rsync && sudo rm -rf /var/lib/apt/lists/*
 
 # The nodejs version in 22.04 is to old
 RUN curl "https://nodejs.org/dist/v20.12.1/node-v20.12.1-linux-x64.tar.xz" | tar -xJf - -C /usr --strip-components=1
 
 # For building pdf.js
 RUN npm install -g gulp-cli
+
+# Install git-cinnabar
+RUN curl 'https://raw.githubusercontent.com/glandium/git-cinnabar/master/download.py' | \
+    python3 - && install -v git-* /usr/bin && rm git-cinnabar git-remote-hg
 
 # Create build user with matching UID/GID to outside user
 RUN groupadd -g ${BUILDER_GID} _builder_podman || :
@@ -41,11 +47,11 @@ USER builder
 WORKDIR /home/builder/firefox
 VOLUME /home/builder/firefox
 
-# Setup the builder user
-COPY ./scripts/setup-user.sh .
-RUN ./setup-user.sh
-
+# Install rust
+COPY ./scripts/rustup.sh .
+RUN ./rustup.sh
 RUN echo "export PATH=\$PATH:$HOME/.cargo/bin" >> ~/.bashrc
+
 RUN git config --global user.email "builder@mozilla.org"
 RUN git config --global user.name "builder"
 

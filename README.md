@@ -35,7 +35,8 @@ sudo xcodebuild -license
 3. Install build dependencies
 ```bash
 brew bundle install --file conf/Brewfile
-./scripts/setup-user.sh
+./scripts/rustup.sh
+npm install -g gulp-cli
 ```
 4. Build
 ```bash

@@ -52,7 +52,7 @@ configure: $(MOZILLA_UNIFIED)
 		git -C $(MOZILLA_UNIFIED) am $$patch; \
 	done
 
-configure-pdfjs: $(PDF_JS)
+configure-pdfjs: $(PDF_JS)/build/mozcentral
 	@echo ">>> Configuring pdf.js for mozilla-unified"
 	$(CURDIR)/scripts/yq \
 		-p origin.url \
@@ -92,21 +92,23 @@ ifeq ($(UNAME),Linux)
 	cat $(CURDIR)/conf/mozconfig_darwin >> $(MOZILLA_UNIFIED)/mozconfig
 else ifeq ($(UNAME),Darwin)
 	cat $(CURDIR)/conf/mozconfig_linux >> $(MOZILLA_UNIFIED)/mozconfig
-else
-	$(error Unsupported platform $(UNAME))
 endif
 	mkdir -p $(OUT)
 	(cd $(MOZILLA_UNIFIED) && ./mach build)
 	(cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install)
+ifeq ($(UNAME),Darwin)
+	# Create installer .dmg
+	(cd $(MOZILLA_UNIFIED) && ./mach package)
+endif
 	@echo ">>> Done"
-	@echo "sudo cp -r $(OUT)/firefox-nightly/usr /usr"
 
 ### pdf.js #####################################################################
+pdfjs: $(PDF_JS)/build/mozcentral
+
 $(PDF_JS):
 	git clone $(PDF_JS_URL) $@
 
-
-pdfjs: $(PDF_JS)
+$(PDF_JS)/build/mozcentral: $(PDF_JS)
 	@echo '>>> Building pdf.js'
 	(cd pdf.js && \
 		npm install --legacy-peer-deps --ignore-scripts)

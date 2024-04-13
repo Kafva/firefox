@@ -22,13 +22,12 @@ ifeq ($(UNAME),Linux)
 else ifeq ($(UNAME),Darwin)
 	OUT := $(CURDIR)/out/$(UNAME)
 	export MOZ_PARALLEL_BUILD ?= $(shell sysctl -n hw.logicalcpu)
+	export RUSTC ?= ~/.cargo/bin/rustc
+	export CARGO ?= ~/.cargo/bin/cargo
 
 else
 	$(error Unsupported platform $(UNAME))
 endif
 
-export MOZ_OBJDIR ?= $(MOZILLA_UNIFIED)/obj
-export RUSTC ?= ~/.cargo/bin/rustc
-export CARGO ?= ~/.cargo/bin/cargo
 
 
