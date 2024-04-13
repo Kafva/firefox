@@ -88,15 +88,11 @@ configure-pdfjs: $(PDF_JS)/build/mozcentral
 build: configure configure-pdfjs
 	@# Add our mozconfig
 	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
-ifeq ($(UNAME),Linux)
-	cat $(CURDIR)/conf/mozconfig_darwin >> $(MOZILLA_UNIFIED)/mozconfig
-else ifeq ($(UNAME),Darwin)
-	cat $(CURDIR)/conf/mozconfig_linux >> $(MOZILLA_UNIFIED)/mozconfig
-endif
+	cat $(CURDIR)/conf/mozconfig_$(UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
 	mkdir -p $(OUT)
 	(cd $(MOZILLA_UNIFIED) && ./mach build)
 	(cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install)
-ifeq ($(UNAME),Darwin)
+ifeq ($(UNAME),darwin)
 	# Create installer .dmg
 	(cd $(MOZILLA_UNIFIED) && ./mach package)
 endif

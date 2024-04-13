@@ -38,7 +38,7 @@ sudo xcodebuild -license
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew bundle install --file conf/Brewfile
 
-# Setup rust 
+# Setup rust
 ./scripts/rustup.sh
 
 # For building pdf.js
