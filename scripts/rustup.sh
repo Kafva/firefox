@@ -9,5 +9,3 @@ bash -s -- -y \
 if [ $(uname) = Darwin ]; then
     "$HOME/.cargo/bin/rustup" target add aarch64-apple-darwin
 fi
-
-"$HOME/.cargo/bin/cargo" install cbindgen

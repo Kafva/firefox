@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y \
     ruby \
     ccache \
     lld \
-    rsync && sudo rm -rf /var/lib/apt/lists/*
+    rsync && rm -rf /var/lib/apt/lists/*
 
 # The nodejs version in 22.04 is to old
 RUN curl "https://nodejs.org/dist/v20.12.1/node-v20.12.1-linux-x64.tar.xz" | tar -xJf - -C /usr --strip-components=1
@@ -51,6 +51,9 @@ VOLUME /home/builder/firefox
 COPY ./scripts/rustup.sh .
 RUN ./rustup.sh
 RUN echo "export PATH=\$PATH:$HOME/.cargo/bin" >> ~/.bashrc
+
+# The cbindgen version in the Ubuntu repo is too old, install it from source
+RUN "$HOME/.cargo/bin/cargo" install cbindgen
 
 RUN git config --global user.email "builder@mozilla.org"
 RUN git config --global user.name "builder"

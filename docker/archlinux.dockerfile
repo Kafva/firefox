@@ -18,6 +18,7 @@ RUN pacman -Syu --noconfirm base-devel \
                             make \
                             ruby \
                             ccache \
+                            cbindgen \
                             lsb-release \
                             lld \
                             rsync \

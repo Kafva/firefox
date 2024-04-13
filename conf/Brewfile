@@ -5,3 +5,5 @@
 #
 brew "git-cinnabar"
 brew "nodejs"
+brew "ccache"
+brew "cbindgen"
