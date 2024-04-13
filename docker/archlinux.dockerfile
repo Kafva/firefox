@@ -20,11 +20,14 @@ RUN pacman -Syu --noconfirm base-devel \
                             ccache \
                             cbindgen \
                             lsb-release \
+                            llvm \
                             lld \
                             rsync \
+                            unzip \
+                            nasm \
                             wasi-compiler-rt \
                             wasi-libc wasi-libc++ \
-                            wasi-libc++abi
+                            wasi-libc++abi && pacman -Scc --noconfirm
 
 # For building pdf.js
 RUN npm install -g gulp-cli
