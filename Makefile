@@ -46,7 +46,7 @@ configure: $(MOZILLA_UNIFIED)
 	@# Update moz.yaml to point to our pdf.js fork
 	git -C $(MOZILLA_UNIFIED) reset --hard origin/$(MOZILLA_UNIFIED_BRANCH)
 	@# Cleanup from previous failures
-	git -C $(MOZILLA_UNIFIED) am --abort || :
+	git -C $(MOZILLA_UNIFIED) am --abort 2> /dev/null || :
 	@# Apply mozilla-unified patches
 	for patch in $(CURDIR)/patches/*.patch; do \
 		git -C $(MOZILLA_UNIFIED) am $$patch; \
