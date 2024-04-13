@@ -42,7 +42,11 @@ WORKDIR /home/builder/firefox
 VOLUME /home/builder/firefox
 
 # Setup the builder user
-COPY setup-user.sh .
+COPY ./scripts/setup-user.sh .
 RUN ./setup-user.sh
+
+RUN echo "export PATH=\$PATH:$HOME/.cargo/bin" >> ~/.bashrc
+RUN git config --global user.email "builder@mozilla.org"
+RUN git config --global user.name "builder"
 
 ENTRYPOINT ["make", "clean", "build"]

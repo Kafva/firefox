@@ -1,7 +1,8 @@
 # firefox
-Build Firefox with patches and a custom pdf.js version on Linux and macOS.
-To use your own patches, place them under `./patches` before starting the build.
-Configuration variables for the build are set in `config.mk` and the `mozconfig` files under `conf`.
+Build Firefox with patches and a custom pdf.js version on Linux and macOS. To
+use your own patches, place them under `./patches` before starting the build.
+Configuration variables for the build are set in `config.mk` and the
+`mozconfig` files under `conf`.
 
 ## Linux
 1. Build in podman for your distro (ubuntu or archlinux):
@@ -34,7 +35,7 @@ sudo xcodebuild -license
 3. Install build dependencies
 ```bash
 brew bundle install --file conf/Brewfile
-./docker/setup-user.sh
+./scripts/setup-user.sh
 ```
 4. Build
 ```bash

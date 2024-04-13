@@ -11,7 +11,7 @@ define podman_run
 	podman build \
 		--build-arg BUILDER_UID=$(shell id -u) \
 		--build-arg BUILDER_GID=$(shell id -g) \
-		-f docker/${1}.dockerfile -t $(IMAGE_NAME):${1}
+		-f docker/${1}.dockerfile -t $(IMAGE_NAME):${1} $(CURDIR)
 	podman run --userns keep-id --rm \
 		${2} \
 		--mount type=bind,src=$(CURDIR),dst=/home/builder/firefox,ro=false \
@@ -39,9 +39,12 @@ $(MOZILLA_UNIFIED):
 
 configure: $(MOZILLA_UNIFIED)
 	@echo ">>> Configuring mozilla-unified"
+	@# Configure git
+	git -C $(MOZILLA_UNIFIED) config --local remote.origin.prune true
+	git -C $(MOZILLA_UNIFIED) config --local fetch.prune true
+	git -C $(MOZILLA_UNIFIED) config --local commit.gpgsign false
 	@# Update moz.yaml to point to our pdf.js fork
 	git -C $(MOZILLA_UNIFIED) reset --hard origin/$(MOZILLA_UNIFIED_BRANCH)
-	git -C $(MOZILLA_UNIFIED) config --local commit.gpgsign false
 	@# Cleanup from previous failures
 	git -C $(MOZILLA_UNIFIED) am --abort || :
 	@# Apply mozilla-unified patches
