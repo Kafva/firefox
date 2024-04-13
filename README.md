@@ -1,5 +1,7 @@
 # firefox
 Build Firefox with patches and a custom pdf.js version on Linux and macOS.
+To use your own patches, place them under `./patches` before starting the build.
+Configuration variables for the build are set in `config.mk` and the `mozconfig` files under `conf`.
 
 ## Linux
 1. Build in podman for your distro (ubuntu or archlinux):
@@ -14,10 +16,12 @@ sudo pacman -S dbus-glib
 ```
 
 ## macOS
-This guide describes how to cross compile from x86_64 to arm64, I recommend
-using [quickemu](https://github.com/quickemu-project/quickemu) to create the
-build machine if you do not have a powerful x86_64 mac lying around.
-You need at least 64 GB of disk. Setup from a fresh install:
+Building Firefox requires a fairly powerful machine, if you do not have a
+powerful mac lying around, I recommend using
+[quickemu](https://github.com/quickemu-project/quickemu) to create the build
+machine. The default settings in `mozconfig_darwin` will compile for an arm64
+target, this works fine when compiling on a x86_64 VM. You need at least 64 GB
+of disk. Setup from a fresh install:
 
 0. Install Xcode command line tools: `xcode-select --install`
 1. Install brew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
@@ -31,6 +35,10 @@ sudo xcodebuild -license
 3. Install build dependencies
 ```bash
 brew bundle install --file conf/Brewfile
+```
+4. Build
+```bash
+make
 ```
 
 

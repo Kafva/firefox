@@ -9,8 +9,8 @@ RUN pacman -Syu --noconfirm base-devel \
                             nodejs \
                             npm \
                             git \
+                            mercurial \
                             python \
-                            python-pip \
                             curl \
                             dbus-glib \
                             gtk3 \

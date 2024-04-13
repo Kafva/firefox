@@ -112,8 +112,8 @@ pdfjs: $(PDF_JS)
 ################################################################################
 
 clean:
-	(cd $(MOZILLA_UNIFIED) && ./mach clobber)
-	(cd $(PDF_JS) && rm -rf build)
+	(cd $(MOZILLA_UNIFIED) && ./mach clobber) || :
+	(cd $(PDF_JS) && rm -rf build) || :
 
 distclean:
 	rm -rf bootstrap.py $(CURDIR)/mozilla-unified $(CURDIR)/pdf.js

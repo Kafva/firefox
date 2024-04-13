@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-python3 -m pip install --user mercurial
-
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
 bash -s -- -y \
            -t wasm32-unknown-unknown \

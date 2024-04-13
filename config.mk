@@ -24,7 +24,6 @@ endif
 # mozilla-unified build options
 export MOZ_PARALLEL_BUILD ?= $(shell nproc)
 export MOZ_OBJDIR ?= $(MOZILLA_UNIFIED)/obj
-
 export RUSTC ?= ~/.cargo/bin/rustc
 export CARGO ?= ~/.cargo/bin/cargo
 
