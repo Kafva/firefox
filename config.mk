@@ -2,8 +2,6 @@
 PDF_JS_URL ?= https://github.com/kafva/pdf.js
 # URL to clone mozilla-unified from
 MOZILLA_UNIFIED_URL ?= https://hg.mozilla.org/mozilla-unified
-# Branch/tag of mozilla-unified to use
-MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_125_END
 
 MOZILLA_UNIFIED := $(CURDIR)/mozilla-unified
 PDF_JS          := $(CURDIR)/pdf.js
@@ -14,12 +12,17 @@ IMAGE_NAME      := firefox-builder
 UNAME := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
 ifeq ($(UNAME),linux)
+	# Branch/tag of mozilla-unified to use
+	MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_125_END
+
 	# Separate output directories for different build targets, allows us to build
 	# with podman from one host.
 	OUT := $(CURDIR)/out/$(shell lsb_release -si | tr '[:upper:]' '[:lower:]')
 	export MOZ_PARALLEL_BUILD ?= $(shell nproc)
 
 else ifeq ($(UNAME),darwin)
+	MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_125_END
+
 	OUT := $(CURDIR)/out/$(UNAME)
 	export MOZ_PARALLEL_BUILD ?= $(shell sysctl -n hw.logicalcpu)
 	export RUSTC ?= ${HOME}/.cargo/bin/rustc

@@ -10,6 +10,7 @@ RUN pacman -Syu --noconfirm base-devel \
                             git \
                             mercurial \
                             python \
+                            python-pip \
                             curl \
                             dbus-glib \
                             gtk3 \

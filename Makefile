@@ -39,7 +39,8 @@ $(MOZILLA_UNIFIED):
 	git -C $(MOZILLA_UNIFIED) checkout $(MOZILLA_UNIFIED_REV)
 	(cd $(MOZILLA_UNIFIED) && ./mach bootstrap --application-choice="Firefox for Desktop")
 
-configure: $(MOZILLA_UNIFIED)
+patch: $(MOZILLA_UNIFIED)/.patched
+$(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED)
 	@echo ">>> Configuring mozilla-unified"
 	@# Configure git
 	git -C $(MOZILLA_UNIFIED) config --local remote.origin.prune true
@@ -53,8 +54,10 @@ configure: $(MOZILLA_UNIFIED)
 	for patch in $(CURDIR)/patches/*.patch; do \
 		git -C $(MOZILLA_UNIFIED) am $$patch; \
 	done
+	touch $@
 
-configure-pdfjs: $(PDF_JS)/build/mozcentral
+patch-pdfjs: $(MOZILLA_UNIFIED)/.patched-pdfjs
+$(MOZILLA_UNIFIED)/.patched-pdfjs: $(PDF_JS)/build/mozcentral
 	@echo ">>> Configuring pdf.js for mozilla-unified"
 	$(CURDIR)/scripts/yq \
 		-p origin.url \
@@ -86,8 +89,9 @@ configure-pdfjs: $(PDF_JS)/build/mozcentral
 		PDFJS_CHECKOUT=$(PDF_JS) GECKO_PATH=$(MOZILLA_UNIFIED) \
 			./update.sh "$(shell git -C $(PDF_JS) rev-parse HEAD)"
 	@echo ">>> update.sh done"
+	touch $@
 
-build: configure configure-pdfjs
+build: $(MOZILLA_UNIFIED)/.patched $(MOZILLA_UNIFIED)/.patched-pdfjs
 	@# Add our mozconfig
 	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
 	cat $(CURDIR)/conf/mozconfig_$(UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
@@ -116,7 +120,10 @@ $(PDF_JS)/build/mozcentral: $(PDF_JS)
 
 ################################################################################
 
-clean:
+unpatch:
+	rm -f $(MOZILLA_UNIFIED)/.patched*
+
+clean: unpatch
 	(cd $(MOZILLA_UNIFIED) 2> /dev/null && ./mach clobber) || :
 	(cd $(PDF_JS) 2> /dev/null && rm -rf build) || :
 
