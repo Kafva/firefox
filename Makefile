@@ -1,5 +1,7 @@
 include config.mk
 
+.PHONY: build
+
 all: build
 
 source: $(MOZILLA_UNIFIED) \
@@ -40,7 +42,7 @@ $(MOZILLA_UNIFIED):
 	(cd $(MOZILLA_UNIFIED) && ./mach bootstrap --application-choice="Firefox for Desktop")
 
 patch: $(MOZILLA_UNIFIED)/.patched
-$(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED)
+$(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED) $(PDF_JS)/build/mozcentral
 	@echo ">>> Configuring mozilla-unified"
 	@# Configure git
 	git -C $(MOZILLA_UNIFIED) config --local remote.origin.prune true
@@ -57,10 +59,6 @@ $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED)
 	for patch in $(CURDIR)/patches/$(MOZILLA_UNIFIED_REV)/*.patch; do \
 		git -C $(MOZILLA_UNIFIED) am $$patch; \
 	done
-	touch $@
-
-patch-pdfjs: $(MOZILLA_UNIFIED)/.patched-pdfjs
-$(MOZILLA_UNIFIED)/.patched-pdfjs: $(PDF_JS)/build/mozcentral
 	@echo ">>> Configuring pdf.js for mozilla-unified"
 	$(CURDIR)/scripts/yq \
 		-p origin.url \
@@ -94,7 +92,7 @@ $(MOZILLA_UNIFIED)/.patched-pdfjs: $(PDF_JS)/build/mozcentral
 	@echo ">>> update.sh done"
 	touch $@
 
-build: $(MOZILLA_UNIFIED)/.patched $(MOZILLA_UNIFIED)/.patched-pdfjs
+build: $(MOZILLA_UNIFIED)/.patched
 	@# Add our mozconfig
 	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
 	cat $(CURDIR)/conf/mozconfig_$(UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
@@ -124,7 +122,7 @@ $(PDF_JS)/build/mozcentral: $(PDF_JS)
 ################################################################################
 
 unpatch:
-	rm -f $(MOZILLA_UNIFIED)/.patched*
+	rm -f $(MOZILLA_UNIFIED)/.patched
 
 clean: unpatch
 	(cd $(MOZILLA_UNIFIED) 2> /dev/null && ./mach clobber) || :
