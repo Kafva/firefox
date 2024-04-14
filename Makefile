@@ -109,6 +109,7 @@ ifeq ($(UNAME),linux)
 else ifeq ($(UNAME),darwin)
 	@# Create installer .dmg
 	(cd $(MOZILLA_UNIFIED) && ./mach package)
+	cp -v $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*.en-US.mac.dmg $(OUT)
 endif
 	@echo ">>> Done"
 
