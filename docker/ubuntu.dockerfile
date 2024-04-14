@@ -50,7 +50,6 @@ VOLUME /home/builder/firefox
 # Install rust
 COPY ./scripts/rustup.sh .
 RUN ./rustup.sh
-RUN echo "export PATH=\$PATH:$HOME/.cargo/bin" >> ~/.bashrc
 
 # The cbindgen version in the Ubuntu repo is too old, install it from source
 RUN "$HOME/.cargo/bin/cargo" install cbindgen

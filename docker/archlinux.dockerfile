@@ -47,7 +47,6 @@ VOLUME /home/builder/firefox
 # Install rust
 COPY ./scripts/rustup.sh .
 RUN ./rustup.sh
-RUN echo "export PATH=\$PATH:$HOME/.cargo/bin" >> ~/.bashrc
 
 RUN git config --global user.email "builder@mozilla.org"
 RUN git config --global user.name "builder"

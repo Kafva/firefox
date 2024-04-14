@@ -25,8 +25,6 @@ else ifeq ($(UNAME),darwin)
 
 	OUT := $(CURDIR)/out/$(UNAME)
 	export MOZ_PARALLEL_BUILD ?= $(shell sysctl -n hw.logicalcpu)
-	export RUSTC ?= ${HOME}/.cargo/bin/rustc
-	export CARGO ?= ${HOME}/.cargo/bin/cargo
 	export LDFLAGS := -L/usr/local/opt/llvm/lib
 	export CPPFLAGS := -I/usr/local/opt/llvm/include
 	export PATH := /usr/local/opt/llvm/bin:${PATH}
@@ -35,5 +33,5 @@ else
 	$(error Unsupported platform $(UNAME))
 endif
 
-
-
+# Make sure rust toolchain is found
+export PATH := ${HOME}/.cargo/bin:${PATH}

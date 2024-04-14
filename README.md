@@ -1,6 +1,6 @@
 # firefox
 Build Firefox with patches and a custom pdf.js version on Linux and macOS. To
-use your own patches, place them under `./patches` before starting the build.
+use your own patches, place them under `./patches/<VERSION>` before starting the build.
 Configuration variables for the build are set in `config.mk` and the
 `mozconfig` files under `conf`.
 
