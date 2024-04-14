@@ -51,7 +51,10 @@ $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED)
 	@# Cleanup from previous failures
 	git -C $(MOZILLA_UNIFIED) am --abort 2> /dev/null || :
 	@# Apply mozilla-unified patches
-	for patch in $(CURDIR)/patches/*.patch; do \
+	for patch in $(CURDIR)/patches/common/*.patch; do \
+		git -C $(MOZILLA_UNIFIED) am $$patch; \
+	done
+	for patch in $(CURDIR)/patches/$(MOZILLA_UNIFIED_REV)/*.patch; do \
 		git -C $(MOZILLA_UNIFIED) am $$patch; \
 	done
 	touch $@

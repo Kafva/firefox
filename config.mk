@@ -21,7 +21,7 @@ ifeq ($(UNAME),linux)
 	export MOZ_PARALLEL_BUILD ?= $(shell nproc)
 
 else ifeq ($(UNAME),darwin)
-	MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_125_END
+	MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_120_END
 
 	OUT := $(CURDIR)/out/$(UNAME)
 	export MOZ_PARALLEL_BUILD ?= $(shell sysctl -n hw.logicalcpu)
