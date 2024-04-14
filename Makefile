@@ -40,6 +40,11 @@ $(MOZILLA_UNIFIED):
 	git -C $(MOZILLA_UNIFIED) cinnabar fetch --tags
 	git -C $(MOZILLA_UNIFIED) checkout $(MOZILLA_UNIFIED_REV)
 	(cd $(MOZILLA_UNIFIED) && ./mach bootstrap --application-choice="Firefox for Desktop")
+ifeq ($(UNAME),darwin)
+	@# The `bootstrap` command installs some packages with brew automatically, the terminal-notifier can
+	@# make the build hang when running in headless mode, remove it.
+	brew uninstall terminal-notifier 2> /dev/null || :
+endif
 
 patch: $(MOZILLA_UNIFIED)/.patched
 $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED) $(PDF_JS)/build/mozcentral
@@ -98,9 +103,11 @@ build: $(MOZILLA_UNIFIED)/.patched
 	cat $(CURDIR)/conf/mozconfig_$(UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
 	mkdir -p $(OUT)
 	(cd $(MOZILLA_UNIFIED) && ./mach build)
+ifeq ($(UNAME),linux)
 	(cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install)
-ifeq ($(UNAME),darwin)
-	# Create installer .dmg
+	@echo "sudo cp -r $(OUT)/firefox-nightly/usr/* /usr"
+else ifeq ($(UNAME),darwin)
+	@# Create installer .dmg
 	(cd $(MOZILLA_UNIFIED) && ./mach package)
 endif
 	@echo ">>> Done"
