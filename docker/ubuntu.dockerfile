@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y \
     lld \
     rsync && rm -rf /var/lib/apt/lists/*
 
-# The nodejs version in 22.04 is to old
+# The nodejs version in 22.04 is too old
 RUN curl "https://nodejs.org/dist/v20.12.1/node-v20.12.1-linux-x64.tar.xz" | tar -xJf - -C /usr --strip-components=1
 
 # For building pdf.js
