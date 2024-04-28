@@ -89,8 +89,6 @@ $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED) $(PDF_JS)/build/mozcentral
 	@#   $(PDF_JS)/build/mozcentral
 	@# into
 	@#   $(MOZILLA_UNIFIED)/toolkit/components/pdfjs
-	@#
-	@# !! `update.sh` uses [ -v ] which is not valid for the built-in bash on macOS !!
 	cd $(MOZILLA_UNIFIED)/toolkit/components/pdfjs && \
 		PDFJS_CHECKOUT=$(PDF_JS) GECKO_PATH=$(MOZILLA_UNIFIED) \
 			./update.sh "$(shell git -C $(PDF_JS) rev-parse HEAD)"

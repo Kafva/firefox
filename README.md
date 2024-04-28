@@ -23,7 +23,8 @@ powerful mac lying around, I recommend using
 machine. This setup is configured to cross compile from x86_64 to arm64.
 You need at least 64 GB of disk. Setup from a fresh install:
 
-1. Setup Xcode (tested with 15.3 on Ventura), can be downloaded from [here](https://xcodereleases.com/)
+1. Setup Xcode (tested with 15.3 on Ventura), can be downloaded from
+   [here](https://xcodereleases.com/) (Apple ID required)
 ```bash
 xcode-select --install
 
