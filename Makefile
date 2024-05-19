@@ -135,4 +135,4 @@ clean: unpatch
 	(cd $(PDF_JS) 2> /dev/null && rm -rf build) || :
 
 distclean:
-	rm -rf bootstrap.py $(CURDIR)/mozilla-unified $(CURDIR)/pdf.js
+	rm -rf bootstrap.py $(MOZILLA_UNIFIED) $(PDF_JS)
