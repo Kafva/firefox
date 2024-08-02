@@ -52,8 +52,8 @@ make
 ```
 
 
-## Development notes for mozilla-unified
-Useful commands:
+## Tips
+Useful commands for the mozilla-unified build system:
 ```bash
 # (clean)
 ./mach clobber
@@ -64,3 +64,5 @@ Useful commands:
 # Custom user.js can be put in ./my_profile
 ./mach run -n -- --profile ./my_profile
 ```
+
+To reuse the same profile after downgrading Firefox, delete `~/.mozilla/firefox/$PROFILE/compatibility.ini`.
