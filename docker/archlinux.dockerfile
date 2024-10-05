@@ -51,4 +51,4 @@ RUN ./rustup.sh
 RUN git config --global user.email "builder@mozilla.org"
 RUN git config --global user.name "builder"
 
-ENTRYPOINT ["make", "clean", "build"]
+ENTRYPOINT ["make", "unpatch", "build"]
