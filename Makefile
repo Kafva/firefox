@@ -105,6 +105,8 @@ build: $(MOZILLA_UNIFIED)/.patched
 	(cd $(MOZILLA_UNIFIED) && ./mach build)
 ifeq ($(UNAME),linux)
 	(cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install)
+	tar -C $(OUT)/firefox-nightly -cf - . | \
+		pzstd -f --ultra -22 - -o $(OUT)/firefox-nightly.tar.zst
 	@echo "sudo cp -r $(OUT)/firefox-nightly/usr/* /usr"
 else ifeq ($(UNAME),darwin)
 	@# Create installer .dmg

@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     git \
     mercurial \
     nasm \
+    zstd \
     m4 \
     libdbus-glib-1-dev \
     libx11-xcb-dev \
