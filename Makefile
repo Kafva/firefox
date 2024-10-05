@@ -61,9 +61,11 @@ $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED) $(PDF_JS)/build/mozcentral
 	for patch in $(CURDIR)/patches/common/*.patch; do \
 		git -C $(MOZILLA_UNIFIED) am $$patch; \
 	done
+ifneq ($(shell find $(CURDIR)/patches/$(MOZILLA_UNIFIED_REV) -type f -name '*.patch' 2> /dev/null || :),)
 	for patch in $(CURDIR)/patches/$(MOZILLA_UNIFIED_REV)/*.patch; do \
 		git -C $(MOZILLA_UNIFIED) am $$patch; \
 	done
+endif
 	@echo ">>> Configuring pdf.js for mozilla-unified"
 	$(CURDIR)/scripts/yq \
 		-p origin.url \
