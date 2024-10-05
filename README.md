@@ -51,8 +51,19 @@ npm install -g gulp-cli
 make
 ```
 
-
 ## Tips
+The builtin pdf.js viewer in Firefox can also be patched from a finished build,
+you do not need to build from source.
+```bash
+# Build pdf.js for Firefox
+gulp mozcentral
+
+# Patch the omni.ja of your existing installation with your build output
+(cd build/mozcentral/browser &&
+    ln -fns extensions chrome &&
+    zip "/usr/lib/firefox/omni.ja" 'chrome/*')
+```
+
 Useful commands for the mozilla-unified build system:
 ```bash
 # (clean)
@@ -65,4 +76,6 @@ Useful commands for the mozilla-unified build system:
 ./mach run -n -- --profile ./my_profile
 ```
 
-To reuse the same profile after downgrading Firefox, delete `~/.mozilla/firefox/$PROFILE/compatibility.ini`.
+To reuse the same profile after downgrading Firefox, delete
+`~/.mozilla/firefox/$PROFILE/compatibility.ini`.
+
