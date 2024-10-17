@@ -54,6 +54,9 @@ make
 ## Tips
 The builtin pdf.js viewer in Firefox can also be patched from a finished build,
 you do not need to build from source.
+**NB** This can break other extensions in unexpected ways, e.g. the
+autocompletion for the Vimium omnibar.
+
 ```bash
 # Build pdf.js for Firefox
 gulp mozcentral
