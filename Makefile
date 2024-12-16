@@ -7,6 +7,10 @@ all: build
 source: $(MOZILLA_UNIFIED) \
 	    $(PDF_JS)
 
+define msg
+	@printf "\033[3m>>>> $(1)\033[0m\n"
+endef
+
 # $1: Distribution name
 # $2: Extra podman flags
 define podman_run
@@ -35,7 +39,7 @@ archlinux-shell: docker/archlinux.dockerfile
 
 ### firefox ####################################################################
 $(MOZILLA_UNIFIED):
-	@echo ">>> Fetching firefox source"
+	$(call msg,Fetching firefox source)
 	git -c fetch.prune=true \
 		-c remote.origin.prune=true \
 		clone hg::$(MOZILLA_UNIFIED_URL)
@@ -43,30 +47,26 @@ $(MOZILLA_UNIFIED):
 	git -C $(MOZILLA_UNIFIED) checkout $(MOZILLA_UNIFIED_REV)
 	(cd $(MOZILLA_UNIFIED) && ./mach bootstrap --application-choice="Firefox for Desktop")
 ifeq ($(UNAME),darwin)
-	@# The `bootstrap` command installs some packages with brew automatically, the terminal-notifier can
-	@# make the build hang when running in headless mode, remove it.
+	@# The `bootstrap` command installs some packages with brew automatically,
+	@# the terminal-notifier can make the build hang when running in headless
+	@# mode, remove it.
 	brew uninstall terminal-notifier 2> /dev/null || :
 endif
 
 patch: $(MOZILLA_UNIFIED)/.patched
 $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED) $(PDF_JS)/build/mozcentral
-	@echo ">>> Configuring mozilla-unified"
+	$(call msg,Configuring mozilla-unified)
 	@# Configure git
 	git -C $(MOZILLA_UNIFIED) config --local commit.gpgsign false
 	@# Update moz.yaml to point to our pdf.js fork
 	git -C $(MOZILLA_UNIFIED) reset --hard $(MOZILLA_UNIFIED_REV)
 	@# Cleanup from previous failures
-	git -C $(MOZILLA_UNIFIED) am --abort 2> /dev/null || :
+	-git -C $(MOZILLA_UNIFIED) am --abort 2> /dev/null
 	@# Apply mozilla-unified patches
-	for patch in $(CURDIR)/patches/common/*.patch; do \
-		git -C $(MOZILLA_UNIFIED) am $$patch; \
+	for patch in $(CURDIR)/patches/*.patch; do \
+		git -C $(MOZILLA_UNIFIED) am --3way $$patch; \
 	done
-ifneq ($(shell find $(CURDIR)/patches/$(MOZILLA_UNIFIED_REV) -type f -name '*.patch' 2> /dev/null || :),)
-	for patch in $(CURDIR)/patches/$(MOZILLA_UNIFIED_REV)/*.patch; do \
-		git -C $(MOZILLA_UNIFIED) am $$patch; \
-	done
-endif
-	@echo ">>> Configuring pdf.js for mozilla-unified"
+	$(call,Configuring pdf.js for mozilla-unified)
 	$(CURDIR)/scripts/yq \
 		-p origin.url \
 		-s "$(PDF_JS_URL)" \
@@ -94,7 +94,7 @@ endif
 	cd $(MOZILLA_UNIFIED)/toolkit/components/pdfjs && \
 		PDFJS_CHECKOUT=$(PDF_JS) GECKO_PATH=$(MOZILLA_UNIFIED) \
 			./update.sh "$(shell git -C $(PDF_JS) rev-parse HEAD)"
-	@echo ">>> update.sh done"
+	$(call msg,update.sh done)
 	touch $@
 
 build: $(MOZILLA_UNIFIED)/.patched
@@ -113,7 +113,7 @@ else ifeq ($(UNAME),darwin)
 	(cd $(MOZILLA_UNIFIED) && ./mach package)
 	cp -v $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*.en-US.mac.dmg $(OUT)
 endif
-	@echo ">>> Done"
+	$(call msg,Done)
 
 ### pdf.js #####################################################################
 pdfjs: $(PDF_JS)/build/mozcentral
@@ -122,11 +122,11 @@ $(PDF_JS):
 	git clone $(PDF_JS_URL) $@
 
 $(PDF_JS)/build/mozcentral: $(PDF_JS)
-	@echo '>>> Building pdf.js'
-	(cd pdf.js && \
-		npm install --legacy-peer-deps --ignore-scripts)
-	(cd pdf.js && \
-		gulp mozcentral)
+	$(call msg,Building pdf.js)
+	cd pdf.js && \
+		npm install --legacy-peer-deps --ignore-scripts
+	cd pdf.js && \
+		gulp mozcentral
 
 
 ################################################################################
@@ -135,8 +135,8 @@ unpatch:
 	rm -f $(MOZILLA_UNIFIED)/.patched
 
 clean: unpatch
-	(cd $(MOZILLA_UNIFIED) 2> /dev/null && ./mach clobber) || :
-	(cd $(PDF_JS) 2> /dev/null && rm -rf build) || :
+	-cd $(MOZILLA_UNIFIED) 2> /dev/null && ./mach clobber
+	-cd $(PDF_JS) 2> /dev/null && rm -rf build
 
 distclean:
 	rm -rf bootstrap.py $(MOZILLA_UNIFIED) $(PDF_JS)
