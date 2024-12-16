@@ -18,7 +18,7 @@ define podman_run
 		--build-arg BUILDER_UID=$(shell id -u) \
 		--build-arg BUILDER_GID=$(shell id -g) \
 		-f docker/${1}.dockerfile -t $(IMAGE_NAME):${1} $(CURDIR)
-	podman run --userns keep-id --rm \
+	podman run -it --userns keep-id --rm \
 		${2} \
 		--mount type=bind,src=$(CURDIR),dst=/home/builder/firefox,ro=false \
 		$(IMAGE_NAME):${1}
@@ -29,13 +29,13 @@ ubuntu: docker/ubuntu.dockerfile
 	$(call podman_run,ubuntu)
 
 ubuntu-shell: docker/ubuntu.dockerfile
-	$(call podman_run,ubuntu,-it --entrypoint /bin/bash)
+	$(call podman_run,ubuntu,--entrypoint /bin/bash)
 
 archlinux: docker/archlinux.dockerfile
 	$(call podman_run,archlinux)
 
 archlinux-shell: docker/archlinux.dockerfile
-	$(call podman_run,archlinux,-it --entrypoint /bin/bash)
+	$(call podman_run,archlinux,--entrypoint /bin/bash)
 
 ### firefox ####################################################################
 $(MOZILLA_UNIFIED):
