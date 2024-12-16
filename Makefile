@@ -29,13 +29,13 @@ ubuntu: docker/ubuntu.dockerfile
 	$(call podman_run,ubuntu)
 
 ubuntu-shell: docker/ubuntu.dockerfile
-	$(call podman_run,ubuntu,-u root -it --entrypoint /bin/bash)
+	$(call podman_run,ubuntu,-it --entrypoint /bin/bash)
 
 archlinux: docker/archlinux.dockerfile
 	$(call podman_run,archlinux)
 
 archlinux-shell: docker/archlinux.dockerfile
-	$(call podman_run,archlinux,-u root -it --entrypoint /bin/bash)
+	$(call podman_run,archlinux,-it --entrypoint /bin/bash)
 
 ### firefox ####################################################################
 $(MOZILLA_UNIFIED):
