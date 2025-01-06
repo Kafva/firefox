@@ -1,6 +1,6 @@
 # firefox
 Build Firefox with patches and a custom pdf.js version on Linux and macOS. To
-use your own patches, place them under `./patches/<VERSION>` before starting the build.
+use your own patches, place them under `./patches` before starting the build.
 Configuration variables for the build are set in `config.mk` and the
 `mozconfig` files under `conf`.
 
@@ -17,17 +17,16 @@ sudo pacman -S dbus-glib
 ```
 
 ## macOS
-Building Firefox requires a fairly powerful machine, if you do not have a
-powerful mac lying around, I recommend using
-[quickemu](https://github.com/quickemu-project/quickemu) to create the build
-machine. This setup is configured to cross compile from x86_64 to arm64.
-You need at least 64 GB of disk. Setup from a fresh install:
+The default configuration in the repository compiles for arm64, cross-compiling
+from a x86_64 machine should work. You need at least 64 GB of disk. Setup from
+a fresh install:
 
-1. Setup Xcode (tested with 15.3 on Ventura), can be downloaded from
+1. Setup Xcode, can be downloaded from
    [here](https://xcodereleases.com/) (Apple ID required)
 ```bash
 xcode-select --install
 
+# XXX: Newer Xcode version may be required...
 (cd /Applications && xip --expand ~/Downloads/Xcode_15.3.xip)
 
 sudo xcode-select --switch /Applications/Xcode.app

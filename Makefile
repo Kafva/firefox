@@ -66,35 +66,25 @@ $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED) $(PDF_JS)/build/mozcentral
 	for patch in $(CURDIR)/patches/*.patch; do \
 		git -C $(MOZILLA_UNIFIED) am --3way $$patch; \
 	done
-	$(call,Configuring pdf.js for mozilla-unified)
-	$(CURDIR)/scripts/yq \
-		-p origin.url \
-		-s "$(PDF_JS_URL)" \
-		$(PDF_JS_MOZ_YAML)
-	$(CURDIR)/scripts/yq \
-		-p origin.release \
-		-s "$(shell git -C $(PDF_JS) rev-parse HEAD)" \
-		$(PDF_JS_MOZ_YAML)
-	$(CURDIR)/scripts/yq \
-		-p origin.revision \
-		-s "$(shell git -C $(PDF_JS) rev-parse HEAD)" \
-		$(PDF_JS_MOZ_YAML)
-	@# Commit the changes
-	git -C $(MOZILLA_UNIFIED) add $(PDF_JS_MOZ_YAML)
-	git -C $(MOZILLA_UNIFIED) commit -m "[AUTOMATED] update pdf.js version"
-	@# Update the checkout of pdfjs that is used
-	@# This will detach the $(PDF_JS) checkout so that it points to the HEAD commit
-	(cd $(MOZILLA_UNIFIED) && \
-		PDFJS_CHECKOUT=$(PDF_JS) ./mach vendor $(PDF_JS_MOZ_YAML))
-	@# Build and sync the mozcentral target from the custom pdf.js with mozilla-unified
-	@# The update.sh script copies files from
+	@# Run the part of mozilla-unified/toolkit/components/pdfjs/update.sh
+	@# which copies output from:
 	@#   $(PDF_JS)/build/mozcentral
 	@# into
 	@#   $(MOZILLA_UNIFIED)/toolkit/components/pdfjs
-	cd $(MOZILLA_UNIFIED)/toolkit/components/pdfjs && \
-		PDFJS_CHECKOUT=$(PDF_JS) GECKO_PATH=$(MOZILLA_UNIFIED) \
-			./update.sh "$(shell git -C $(PDF_JS) rev-parse HEAD)"
-	$(call msg,update.sh done)
+	$(call msg,Configuring mozilla-unified/toolkit/components/pdf.js)
+	cp $(PDF_JS)/LICENSE $(MOZILLA_UNIFIED)/toolkit/components/pdfjs/
+	cp $(PDF_JS)/build/mozcentral/browser/extensions/pdfjs/PdfJsDefaultPrefs.js \
+		$(MOZILLA_UNIFIED)/toolkit/components/pdfjs/PdfJsDefaultPrefs.js
+	rsync -a -v --delete $(PDF_JS)/build/mozcentral/browser/extensions/pdfjs/content/build/ \
+		$(MOZILLA_UNIFIED)/toolkit/components/pdfjs/content/build/
+	rsync -a -v --delete $(PDF_JS)/build/mozcentral/browser/extensions/pdfjs/content/web/ \
+		$(MOZILLA_UNIFIED)/toolkit/components/pdfjs/content/web/
+	-cp $(PDF_JS)/build/mozcentral/browser/locales/en-US/pdfviewer/*.ftl \
+		$(MOZILLA_UNIFIED)/toolkit/locales/en-US/toolkit/pdfviewer/
+	@# Update the revision in the toolchains.yml file for the Talos tests.
+	sed -i -z "s/\(mozilla-pdf\.js.*revision: \)[0-9a-f]*/\1$1/g" \
+		$(MOZILLA_UNIFIED)/taskcluster/kinds/fetch/toolchains.yml
+	git -C $(MOZILLA_UNIFIED) add toolkit/components/pdfjs
 	touch $@
 
 build: $(MOZILLA_UNIFIED)/.patched
@@ -123,10 +113,8 @@ $(PDF_JS):
 
 $(PDF_JS)/build/mozcentral: $(PDF_JS)
 	$(call msg,Building pdf.js)
-	cd pdf.js && \
-		npm install --legacy-peer-deps --ignore-scripts
-	cd pdf.js && \
-		gulp mozcentral
+	cd $(PDF_JS) && npm install --legacy-peer-deps --ignore-scripts
+	cd $(PDF_JS) && gulp mozcentral
 
 
 ################################################################################

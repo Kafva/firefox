@@ -21,7 +21,7 @@ OUT := $(CURDIR)/out/$(shell lsb_release -si | tr '[:upper:]' '[:lower:]')
 export MOZ_PARALLEL_BUILD ?= $(shell nproc)
 
 else ifeq ($(UNAME),darwin)
-MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_120_END
+MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_135_END
 
 OUT := $(CURDIR)/out/$(UNAME)
 export MOZ_PARALLEL_BUILD ?= $(shell sysctl -n hw.logicalcpu)
