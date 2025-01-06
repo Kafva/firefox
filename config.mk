@@ -13,7 +13,7 @@ UNAME := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
 ifeq ($(UNAME),linux)
 # Branch/tag of mozilla-unified to use
-MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_132_END
+MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_135_END
 
 # Separate output directories for different build targets, allows us to build
 # with podman from one host.
