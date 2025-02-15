@@ -78,3 +78,9 @@ Useful commands for the mozilla-unified build system:
 To reuse the same profile after downgrading Firefox, delete
 `~/.mozilla/firefox/$PROFILE/compatibility.ini`.
 
+To create a new release:
+```bash
+git push origin $TAG
+gh release create $TAG out/darwin/*.dmg
+gh release upload $TAG out/*/*.tar.zst
+```
