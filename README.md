@@ -40,9 +40,6 @@ brew bundle install --file conf/Brewfile
 
 # Setup rust
 ./scripts/rustup.sh
-
-# For building pdf.js
-npm install -g gulp-cli
 ```
 
 3. Build
@@ -58,7 +55,7 @@ autocompletion for the Vimium omnibar.
 
 ```bash
 # Build pdf.js for Firefox
-gulp mozcentral
+npx gulp mozcentral
 
 # Patch the omni.ja of your existing installation with your build output
 (cd build/mozcentral/browser &&

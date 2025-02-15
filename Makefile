@@ -114,7 +114,7 @@ $(PDF_JS):
 $(PDF_JS)/build/mozcentral: $(PDF_JS)
 	$(call msg,Building pdf.js)
 	cd $(PDF_JS) && npm install --legacy-peer-deps --ignore-scripts
-	cd $(PDF_JS) && gulp mozcentral
+	cd $(PDF_JS) && npx gulp mozcentral
 
 
 ################################################################################

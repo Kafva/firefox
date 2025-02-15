@@ -30,9 +30,6 @@ RUN pacman -Syu --noconfirm base-devel \
                             wasi-libc wasi-libc++ \
                             wasi-libc++abi && pacman -Scc --noconfirm
 
-# For building pdf.js
-RUN npm install -g gulp-cli
-
 # Install git-cinnabar
 RUN curl 'https://raw.githubusercontent.com/glandium/git-cinnabar/master/download.py' | \
     python3 - && install -v git-* /usr/bin && rm git-cinnabar git-remote-hg
