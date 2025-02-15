@@ -1,4 +1,4 @@
-FROM docker.io/ubuntu:22.04
+FROM docker.io/ubuntu:24.04
 
 ARG BUILDER_UID=${BUILDER_UID:-1000}
 ARG BUILDER_GID=${BUILDER_GID:-1000}
@@ -31,7 +31,11 @@ RUN apt-get update && apt-get install -y \
     lld \
     rsync && rm -rf /var/lib/apt/lists/*
 
-# The nodejs version in 22.04 is too old
+# HINT: `./mach build` dies with: No such file or directory: '/usr/sbin/*'
+RUN ln -fns /usr/bin/ccache /usr/sbin/ccache
+RUN ln -fns /usr/bin/make /usr/sbin/make
+
+# The nodejs version in 24.04 is too old
 RUN curl "https://nodejs.org/dist/v20.12.1/node-v20.12.1-linux-x64.tar.xz" | tar -xJf - -C /usr --strip-components=1
 
 # Install git-cinnabar
@@ -39,6 +43,7 @@ RUN curl 'https://raw.githubusercontent.com/glandium/git-cinnabar/master/downloa
     python3 - && install -v git-* /usr/bin && rm git-cinnabar git-remote-hg
 
 # Create build user with matching UID/GID to outside user
+RUN userdel ubuntu
 RUN groupadd -g ${BUILDER_GID} _builder_podman || :
 RUN useradd --uid ${BUILDER_UID} --gid ${BUILDER_GID} --create-home --shell /bin/bash builder
 USER builder
