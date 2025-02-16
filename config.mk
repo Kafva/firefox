@@ -14,10 +14,11 @@ UNAME := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ifeq ($(UNAME),linux)
 # Branch/tag of mozilla-unified to use
 MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_135_END
+DISTRO := $(shell lsb_release -si | tr '[:upper:]' '[:lower:]')
 
 # Separate output directories for different build targets, allows us to build
 # with podman from one host.
-OUT := $(CURDIR)/out/$(shell lsb_release -si | tr '[:upper:]' '[:lower:]')
+OUT := $(CURDIR)/out/$(DISTRO)
 export MOZ_PARALLEL_BUILD ?= $(shell nproc)
 
 else ifeq ($(UNAME),darwin)
