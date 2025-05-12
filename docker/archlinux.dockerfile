@@ -35,7 +35,7 @@ RUN curl 'https://raw.githubusercontent.com/glandium/git-cinnabar/master/downloa
     python3 - && install -v git-* /usr/bin && rm git-cinnabar git-remote-hg
 
 # Create build user with matching UID/GID to outside user
-RUN groupadd -g ${BUILDER_GID} _builder_podman || :
+RUN groupadd -g ${BUILDER_GID} _builder || :
 RUN useradd --uid ${BUILDER_UID} --gid ${BUILDER_GID} --create-home --shell /bin/bash builder
 USER builder
 WORKDIR /home/builder/firefox

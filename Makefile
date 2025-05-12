@@ -12,13 +12,13 @@ define msg
 endef
 
 # $1: Distribution name
-# $2: Extra podman flags
-define podman_run
-	podman build \
+# $2: Extra docker flags
+define docker_run
+	docker buildx build \
 		--build-arg BUILDER_UID=$(shell id -u) \
 		--build-arg BUILDER_GID=$(shell id -g) \
 		-f docker/${1}.dockerfile -t $(IMAGE_NAME):${1} $(CURDIR)
-	podman run -it --userns keep-id --rm \
+	docker run -it -u $(shell id -u):$(shell id -g) --rm \
 		${2} \
 		--mount type=bind,src=$(CURDIR),dst=/home/builder/firefox,ro=false \
 		$(IMAGE_NAME):${1}
@@ -26,16 +26,16 @@ endef
 
 ### containers #################################################################
 ubuntu: docker/ubuntu.dockerfile
-	$(call podman_run,ubuntu)
+	$(call docker_run,ubuntu)
 
 ubuntu-shell: docker/ubuntu.dockerfile
-	$(call podman_run,ubuntu,--entrypoint /bin/bash)
+	$(call docker_run,ubuntu,--entrypoint /bin/bash)
 
 archlinux: docker/archlinux.dockerfile
-	$(call podman_run,archlinux)
+	$(call docker_run,archlinux)
 
 archlinux-shell: docker/archlinux.dockerfile
-	$(call podman_run,archlinux,--entrypoint /bin/bash)
+	$(call docker_run,archlinux,--entrypoint /bin/bash)
 
 ### firefox ####################################################################
 $(MOZILLA_UNIFIED):

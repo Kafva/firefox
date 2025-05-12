@@ -5,7 +5,7 @@ Configuration variables for the build are set in `config.mk` and the
 `mozconfig` files under `conf`.
 
 ## Linux
-1. Build in podman for your distro (ubuntu or archlinux):
+1. Build in Docker for your distro (ubuntu or archlinux):
 ```bash
 make $DISTRO
 ```
