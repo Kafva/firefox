@@ -43,6 +43,8 @@ $(MOZILLA_UNIFIED):
 	git -c fetch.prune=true \
 		-c remote.origin.prune=true \
 		clone hg::$(MOZILLA_UNIFIED_URL)
+	git -C $(MOZILLA_UNIFIED) config remote.origin.prune true
+	git -C $(MOZILLA_UNIFIED) config fetch.prune true
 	git -C $(MOZILLA_UNIFIED) cinnabar fetch --tags
 	git -C $(MOZILLA_UNIFIED) checkout $(MOZILLA_UNIFIED_REV)
 	(cd $(MOZILLA_UNIFIED) && ./mach bootstrap --application-choice="Firefox for Desktop")
