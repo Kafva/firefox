@@ -13,16 +13,18 @@ UNAME := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
 ifeq ($(UNAME),linux)
 # Branch/tag of mozilla-unified to use
-MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_139_END
-DISTRO := $(shell sed -n 's/^ID=\(.*\)/\1/p' /etc/os-release 2> /dev/null)
+export MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_139_END
+export TARGET ?= x86_64-linux-gnu
 
 # Separate output directories for different build targets, allows us to build
 # with docker from one host.
+DISTRO := $(shell sed -n 's/^ID=\(.*\)/\1/p' /etc/os-release 2> /dev/null)
 OUT := $(CURDIR)/out/$(DISTRO)
 export MOZ_PARALLEL_BUILD ?= $(shell nproc)
 
 else ifeq ($(UNAME),darwin)
-MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_139_END
+export MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_139_END
+export TARGET ?= aarch64-apple-darwin
 
 OUT := $(CURDIR)/out/$(UNAME)
 export MOZ_PARALLEL_BUILD ?= $(shell sysctl -n hw.logicalcpu)

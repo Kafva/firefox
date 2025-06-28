@@ -1,11 +1,17 @@
 # firefox
 Build Firefox with patches and a custom pdf.js version on Linux and macOS. To
 use your own patches, place them under `./patches` before starting the build.
-Configuration variables for the build are set in `config.mk` and the
-`mozconfig` files under `conf`.
+Configuration variables for the build are set in `config.mk`.
 
 ## Linux
-1. Build in Docker for your distro (ubuntu or archlinux):
+Supported distros:
+* `ubuntu` 
+* `archlinux`
+
+Override `TARGET=` to change the target architecture, only `x86_64-linux-gnu`
+for now.
+
+1. Build in Docker for your distro:
 ```bash
 make $DISTRO
 ```
@@ -73,6 +79,9 @@ Useful commands for the mozilla-unified build system:
 
 # Custom user.js can be put in ./my_profile
 ./mach run -n -- --profile ./my_profile
+
+# Possible arguments for ac_add_options
+./configure --help
 ```
 
 To reuse the same profile after downgrading Firefox, delete

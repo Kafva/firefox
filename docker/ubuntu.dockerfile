@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     lsb-release \
+    sudo \
     build-essential \
     clang \
     curl \
@@ -29,7 +30,10 @@ RUN apt-get update && apt-get install -y \
     ruby \
     ccache \
     lld \
-    rsync && rm -rf /var/lib/apt/lists/*
+    rsync
+
+# Cleanup cache
+RUN rm -rf /var/lib/apt/lists/*
 
 # HINT: `./mach build` dies with: No such file or directory: '/usr/sbin/*'
 RUN ln -fns /usr/bin/ccache /usr/sbin/ccache
@@ -46,6 +50,8 @@ RUN curl 'https://raw.githubusercontent.com/glandium/git-cinnabar/master/downloa
 RUN userdel ubuntu
 RUN groupadd -g ${BUILDER_GID} _builder || :
 RUN useradd --uid ${BUILDER_UID} --gid ${BUILDER_GID} --create-home --shell /bin/bash builder
+# Make it easy to install more packages for debugging
+RUN echo "builder ALL=NOPASSWD: ALL" > /etc/sudoers.d/builder
 USER builder
 WORKDIR /home/builder/firefox
 VOLUME /home/builder/firefox

@@ -27,6 +27,3 @@ ac_add_options --disable-updater
 ac_add_options --disable-bootstrap
 ac_add_options --disable-debug
 ac_add_options --disable-debug-symbols
-
-
-

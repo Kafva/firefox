@@ -4,6 +4,7 @@ ARG BUILDER_UID=${BUILDER_UID:-1000}
 ARG BUILDER_GID=${BUILDER_GID:-1000}
 
 RUN pacman -Syu --noconfirm base-devel \
+                            sudo \
                             clang \
                             nodejs \
                             npm \
@@ -37,6 +38,8 @@ RUN curl 'https://raw.githubusercontent.com/glandium/git-cinnabar/master/downloa
 # Create build user with matching UID/GID to outside user
 RUN groupadd -g ${BUILDER_GID} _builder || :
 RUN useradd --uid ${BUILDER_UID} --gid ${BUILDER_GID} --create-home --shell /bin/bash builder
+# Make it easy to install more packages for debugging
+RUN echo "builder ALL=NOPASSWD: ALL" > /etc/sudoers.d/builder
 USER builder
 WORKDIR /home/builder/firefox
 VOLUME /home/builder/firefox

@@ -13,12 +13,15 @@ endef
 
 # $1: Distribution name
 # $2: Extra docker flags
+# Note: Variables passed from CLI need to explicitly passed here
 define docker_run
 	docker buildx build \
 		--build-arg BUILDER_UID=$(shell id -u) \
 		--build-arg BUILDER_GID=$(shell id -g) \
 		-f docker/${1}.dockerfile -t $(IMAGE_NAME):${1} $(CURDIR)
 	docker run -it -u $(shell id -u):$(shell id -g) --rm \
+		-e MOZILLA_UNIFIED_REV=$(MOZILLA_UNIFIED_REV) \
+		-e TARGET=$(TARGET) \
 		${2} \
 		--mount type=bind,src=$(CURDIR),dst=/home/builder/firefox,ro=false \
 		$(IMAGE_NAME):${1}
@@ -93,17 +96,18 @@ build: $(MOZILLA_UNIFIED)/.patched
 	@# Add our mozconfig
 	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
 	cat $(CURDIR)/conf/mozconfig_$(UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
+	echo "ac_add_options --target=$(TARGET)" >> $(MOZILLA_UNIFIED)/mozconfig
 	mkdir -p $(OUT)
-	(cd $(MOZILLA_UNIFIED) && ./mach build)
+	(cd $(MOZILLA_UNIFIED) && ./mach -l build.log build)
 ifeq ($(UNAME),linux)
 	(cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install)
 	tar -C $(OUT)/firefox-nightly -cf - . | \
-		pzstd -f - -o $(OUT)/firefox-nightly-$(DISTRO).tar.zst
+		pzstd -f - -o $(OUT)/firefox-nightly-$(DISTRO)-$(TARGET).tar.zst
 	@echo "sudo cp -r $(OUT)/firefox-nightly/usr/* /usr"
 else ifeq ($(UNAME),darwin)
 	@# Create installer .dmg
 	(cd $(MOZILLA_UNIFIED) && ./mach package)
-	cp -v $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*.en-US.mac.dmg $(OUT)
+	cp -v $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*-$(TARGET).en-US.mac.dmg $(OUT)
 endif
 	$(call msg,Done)
 
