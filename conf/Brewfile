@@ -3,7 +3,6 @@
 #
 # macOS build dependencies
 #
-brew "git-cinnabar"
 brew "nodejs"
 brew "cbindgen"
 brew "llvm"

@@ -5,7 +5,7 @@ Configuration variables for the build are set in `config.mk`.
 
 ## Linux
 Supported distros:
-* `ubuntu` 
+* `ubuntu`
 * `archlinux`
 
 Override `TARGET=` to change the target architecture, only `x86_64-linux-gnu`
@@ -32,8 +32,7 @@ a fresh install:
 ```bash
 xcode-select --install
 
-# XXX: Newer Xcode version may be required...
-(cd /Applications && xip --expand ~/Downloads/Xcode_15.3.xip)
+(cd /Applications && xip --expand ~/Downloads/Xcode_*.xip)
 
 sudo xcode-select --switch /Applications/Xcode.app
 sudo xcodebuild -license
@@ -86,10 +85,3 @@ Useful commands for the mozilla-unified build system:
 
 To reuse the same profile after downgrading Firefox, delete
 `~/.mozilla/firefox/$PROFILE/compatibility.ini`.
-
-To create a new release:
-```bash
-git push origin $TAG
-gh release create $TAG out/darwin/*.dmg
-gh release upload $TAG out/*/*.tar.zst
-```

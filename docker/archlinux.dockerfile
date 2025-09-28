@@ -3,13 +3,17 @@ FROM docker.io/archlinux:latest
 ARG BUILDER_UID=${BUILDER_UID:-1000}
 ARG BUILDER_GID=${BUILDER_GID:-1000}
 
+# Update keyring
+RUN pacman-key --init && \
+    pacman --noconfirm -Syu && \
+    pacman --noconfirm -Sy archlinux-keyring && \
+    pacman --noconfirm -Syu
+# Install packages
 RUN pacman -Syu --noconfirm base-devel \
-                            sudo \
                             clang \
                             nodejs \
                             npm \
                             git \
-                            mercurial \
                             python \
                             python-pip \
                             curl \
@@ -31,10 +35,6 @@ RUN pacman -Syu --noconfirm base-devel \
                             wasi-libc wasi-libc++ \
                             wasi-libc++abi && pacman -Scc --noconfirm
 
-# Install git-cinnabar
-RUN curl 'https://raw.githubusercontent.com/glandium/git-cinnabar/master/download.py' | \
-    python3 - && install -v git-* /usr/bin && rm git-cinnabar git-remote-hg
-
 # Create build user with matching UID/GID to outside user
 RUN groupadd -g ${BUILDER_GID} _builder || :
 RUN useradd --uid ${BUILDER_UID} --gid ${BUILDER_GID} --create-home --shell /bin/bash builder
@@ -50,5 +50,8 @@ RUN ./rustup.sh
 
 RUN git config --global user.email "builder@mozilla.org"
 RUN git config --global user.name "builder"
+RUN git config --global remote.origin.prune true
+RUN git config --global fetch.prune true
+RUN git config --global commit.gpgsign false
 
 ENTRYPOINT ["make", "unpatch", "build"]

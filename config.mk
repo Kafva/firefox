@@ -1,13 +1,12 @@
-# URL to fork of pdf.js to use
-PDF_JS_URL ?= https://github.com/kafva/pdf.js
-# URL to clone mozilla-unified from
-MOZILLA_UNIFIED_URL ?= https://hg.mozilla.org/mozilla-unified
-
 MOZILLA_UNIFIED := $(CURDIR)/mozilla-unified
-PDF_JS          := $(CURDIR)/pdf.js
-PDF_JS_MOZ_YAML := $(MOZILLA_UNIFIED)/toolkit/components/pdfjs/moz.yaml
-# Name of builder image, different tags for different distros.
-IMAGE_NAME      := firefox-builder
+MOZILLA_UNIFIED_URL := https://github.com/mozilla-firefox/firefox.git
+
+PDF_JS := $(CURDIR)/pdf.js
+PDF_JS_URL ?= https://github.com/kafva/pdf.js
+PDF_JS_REV ?= 2538a9b889152c278cc519edb40abc35e59000f6
+
+# Tag for new build
+TAG ?= $(shell date '+%Y.%m.%d')
 
 UNAME := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
@@ -36,5 +35,11 @@ else
 $(error Unsupported platform $(UNAME))
 endif
 
+# Docker image name, differentt tags for different distros
+IMAGE_NAME      := firefox-builder
+
 # Make sure rust toolchain is found
 export PATH := ${HOME}/.cargo/bin:${PATH}
+
+# Extra arguments for clone
+GIT_CLONE_ARGS ?=
