@@ -13,7 +13,7 @@ UNAME := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
 ifeq ($(UNAME),linux)
 # Branch/tag of mozilla-unified to use
-export MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_139_END
+export MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_143_END
 export TARGET ?= x86_64-linux-gnu
 
 # Separate output directories for different build targets, allows us to build
@@ -23,7 +23,7 @@ OUT := $(CURDIR)/out/$(DISTRO)
 export MOZ_PARALLEL_BUILD ?= $(shell nproc)
 
 else ifeq ($(UNAME),darwin)
-export MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_139_END
+export MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_143_END
 export TARGET ?= aarch64-apple-darwin
 
 OUT := $(CURDIR)/out/$(UNAME)
