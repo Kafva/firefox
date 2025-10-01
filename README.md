@@ -11,15 +11,9 @@ Supported distros:
 Override `TARGET=` to change the target architecture, only `x86_64-linux-gnu`
 for now.
 
-1. Build in Docker for your distro:
+Build via Docker (or Apple container) for your distro:
 ```bash
 make $DISTRO
-```
-
-2. Install runtime dependencies
-```bash
-sudo apt install libdbus-glib1.0-cil
-sudo pacman -S dbus-glib
 ```
 
 ## macOS
@@ -49,7 +43,7 @@ brew bundle install --file conf/Brewfile
 
 3. Build
 ```bash
-make
+make macos
 ```
 
 ## Tips

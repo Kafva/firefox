@@ -2,7 +2,7 @@ include config.mk
 
 .PHONY: build
 
-all: build
+build:
 
 source: $(MOZILLA_UNIFIED)/.cloned \
 	    $(PDF_JS)/.cloned
@@ -15,19 +15,24 @@ endef
 # $2: Extra docker flags
 # Note: Variables passed from CLI need to explicitly passed here
 define docker_run
-	docker buildx build \
+	$(CONTAINER_BUILD) \
 		--build-arg BUILDER_UID=$(shell id -u) \
 		--build-arg BUILDER_GID=$(shell id -g) \
 		-f docker/${1}.dockerfile -t $(IMAGE_NAME):${1} $(CURDIR)
-	docker run -it -u $(shell id -u):$(shell id -g) --rm \
+	$(CONTAINER_RUN) -it -u $(shell id -u):$(shell id -g) --rm \
 		-e MOZILLA_UNIFIED_REV=$(MOZILLA_UNIFIED_REV) \
 		-e TARGET=$(TARGET) \
+		-e TARGET_UNAME=$(TARGET_UNAME) \
+		-e DISTRO=$(DISTRO) \
+		-e OUT=$(OUT) \
 		${2} \
 		--mount type=bind,src=$(CURDIR),dst=/home/builder/firefox,ro=false \
 		$(IMAGE_NAME):${1}
 endef
 
-### containers #################################################################
+### targets ####################################################################
+macos: build
+
 ubuntu: docker/ubuntu.dockerfile
 	$(call docker_run,ubuntu)
 
@@ -77,21 +82,22 @@ $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED)/.cloned $(PDF_JS)/build/mozcentr
 	touch $@
 
 build: $(MOZILLA_UNIFIED)/.patched
+	$(call msg,Building target $(DISTRO) $(TARGET_UNAME) $(TARGET))
 	@# Add our mozconfig
 	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
-	cat $(CURDIR)/conf/mozconfig_$(UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
+	cat $(CURDIR)/conf/mozconfig_$(TARGET_UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
 	echo "ac_add_options --target=$(TARGET)" >> $(MOZILLA_UNIFIED)/mozconfig
 	mkdir -p $(OUT)
 	(cd $(MOZILLA_UNIFIED) && ./mach -l build.log build)
-ifeq ($(UNAME),linux)
+ifeq ($(TARGET_UNAME),linux)
 	(cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install)
 	tar -C $(OUT)/firefox-nightly -cf - . | \
 		pzstd -f - -o $(OUT)/$(MOZILLA_UNIFIED_REV)-$(DISTRO)-$(TARGET).tar.zst
 	@echo "sudo cp -r $(OUT)/firefox-nightly/usr/* /usr"
-else ifeq ($(UNAME),darwin)
+else ifeq ($(TARGET_UNAME),darwin)
 	@# Create installer .dmg
 	(cd $(MOZILLA_UNIFIED) && ./mach package)
-	cp -v $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*-$(TARGET).en-US.mac.dmg $(OUT)
+	cp $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*.en-US.mac.dmg $(OUT)
 endif
 	$(call msg,Done)
 
@@ -117,6 +123,17 @@ unpatch:
 clean: unpatch
 	-cd $(MOZILLA_UNIFIED) 2> /dev/null && ./mach clobber
 	-cd $(PDF_JS) 2> /dev/null && rm -rf build
+
+all:
+ifeq ($(shell uname),Darwin)
+	$(MAKE) clean
+	$(MAKE) macos
+endif
+	$(MAKE) clean
+	$(MAKE) ubuntu
+
+	$(MAKE) clean
+	$(MAKE) archlinux
 
 release:
 	git tag -f $(TAG)
