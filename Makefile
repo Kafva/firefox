@@ -13,7 +13,7 @@ endef
 
 # $1: Distribution name
 # $2: Extra docker flags
-# Note: Variables passed from CLI need to explicitly passed here
+# NOTE: Variables need to be explicitly passed via `-e` here to take effect!
 define docker_run
 	$(CONTAINER_BUILD) \
 		--build-arg BUILDER_UID=$(shell id -u) \

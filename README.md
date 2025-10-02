@@ -4,22 +4,23 @@ use your own patches, place them under `./patches` before starting the build.
 Configuration variables for the build are set in `config.mk`.
 
 ## Linux
-Supported distros:
-* `ubuntu`
-* `archlinux`
+Linux targets can be built from both Linux and macOS via containers.
 
-Override `TARGET=` to change the target architecture, only `x86_64-linux-gnu`
-for now.
-
-Build via Docker (or Apple container) for your distro:
 ```bash
 make $DISTRO
 ```
 
+Supported `DISTRO` values:
+* `ubuntu`
+* `archlinux`
+
+The `TARGET=` variable controls the target architecture, only
+`x86_64-linux-gnu` is tested to work for Linux.
+
 ## macOS
-The default configuration in the repository compiles for arm64, cross-compiling
-from a x86_64 machine should work. You need at least 64 GB of disk. Setup from
-a fresh install:
+The macOS target can only be built from a macOS host. The default configuration
+in the repository compiles for arm64, cross-compiling from a x86_64 machine
+should work. You need at least 64 GB of disk. Setup from a fresh install:
 
 1. Setup Xcode, can be downloaded from
    [here](https://xcodereleases.com/) (Apple ID required)
@@ -36,8 +37,6 @@ sudo xcodebuild -license
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew bundle install --file conf/Brewfile
-
-# Setup rust
 ./scripts/rustup.sh
 ```
 
