@@ -6,6 +6,9 @@ PDF_JS := $(CURDIR)/pdf.js
 PDF_JS_URL ?= https://github.com/kafva/pdf.js
 PDF_JS_REV ?= 2538a9b889152c278cc519edb40abc35e59000f6
 
+# https://firefox-source-docs.mozilla.org/writing-rust-code/update-policy.html
+RUST_VERSION = 1.86
+
 # Target settings
 ifneq ($(filter macos,$(MAKECMDGOALS)),)
 export TARGET_UNAME := darwin

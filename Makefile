@@ -86,6 +86,8 @@ build:
 
 _build: $(MOZILLA_UNIFIED)/.patched
 	$(call msg,Building target $(DISTRO) $(TARGET_UNAME) $(TARGET))
+	@# Set rust toolchain version
+	rustup default $(RUST_VERSION)
 	@# Add our mozconfig
 	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
 	cat $(CURDIR)/conf/mozconfig_$(TARGET_UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
@@ -102,6 +104,8 @@ else ifeq ($(TARGET_UNAME),darwin)
 	cd $(MOZILLA_UNIFIED) && ./mach package
 	cp $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*.en-US.mac.dmg $(OUT)
 endif
+	@# Restore default toolchain
+	rustup default stable
 	$(call msg,Done)
 
 ### pdf.js #####################################################################
