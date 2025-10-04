@@ -81,14 +81,17 @@ $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED)/.cloned $(PDF_JS)/build/mozcentr
 	git -C $(@D) add toolkit/components/pdfjs
 	touch $@
 
-build: $(MOZILLA_UNIFIED)/.patched
+build:
+	$(MAKE) _build 2>&1 | tee $(MOZILLA_UNIFIED)/build-$(shell date '+%Y-%m-%d-%H-%M').log
+
+_build: $(MOZILLA_UNIFIED)/.patched
 	$(call msg,Building target $(DISTRO) $(TARGET_UNAME) $(TARGET))
 	@# Add our mozconfig
 	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
 	cat $(CURDIR)/conf/mozconfig_$(TARGET_UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
 	echo "ac_add_options --target=$(TARGET)" >> $(MOZILLA_UNIFIED)/mozconfig
 	mkdir -p $(OUT)
-	cd $(MOZILLA_UNIFIED) && ./mach --log-no-times -l build.log build
+	cd $(MOZILLA_UNIFIED) && ./mach build
 ifeq ($(TARGET_UNAME),linux)
 	cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install
 	tar -C $(OUT)/firefox-nightly -cf - . | \
@@ -139,7 +142,7 @@ release:
 	git tag -f $(TAG)
 	-git push -d origin $(TAG) 2> /dev/null
 	git push origin $(TAG)
-	gh release create $(TAG) $(wildcard out/darwin/*.dmg)
+	gh release create $(TAG) $(wildcard out/macos/*.dmg)
 	gh release upload $(TAG) $(wildcard out/*/*.tar.zst)
 
 distclean:
