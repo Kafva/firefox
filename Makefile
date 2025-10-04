@@ -144,8 +144,8 @@ endif
 
 release:
 	git tag -f $(TAG)
-	-git push -d origin $(TAG) 2> /dev/null
-	git push origin $(TAG)
+	-git push -d gh $(TAG) 2> /dev/null
+	git push gh $(TAG)
 	gh release create $(TAG) $(wildcard out/macos/*.dmg)
 	gh release upload $(TAG) $(wildcard out/*/*.tar.zst)
 
