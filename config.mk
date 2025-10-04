@@ -51,6 +51,11 @@ TAG ?= $(shell date '+%Y.%m.%d')
 export MOZ_PARALLEL_BUILD ?= $(shell nproc)
 # Avoid terminal-notifier call on completion
 export MOZ_AUTOMATION = 1
+# Need to be explicitly set for ./mach package stage on macOS(?)
+export MOZ_SOURCE_REPO = $(CURDIR)/mozilla-unified
+export MOZ_SOURCE_CHANGESET = $(MOZILLA_UNIFIED_REV)
+export MOZ_BUILD_DATE = $(shell date '+%Y%m%d%H%M%S')
+export MH_BRANCH = $(MOZILLA_UNIFIED_REV)
 
 export OUT := $(CURDIR)/out/$(DISTRO)
 
