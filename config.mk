@@ -1,6 +1,6 @@
 MOZILLA_UNIFIED := $(CURDIR)/mozilla-unified
 MOZILLA_UNIFIED_URL := https://github.com/mozilla-firefox/firefox.git
-export MOZILLA_UNIFIED_REV ?= FIREFOX_NIGHTLY_143_END
+export MOZILLA_UNIFIED_REV ?= FIREFOX_143_0_4_RELEASE
 
 PDF_JS := $(CURDIR)/pdf.js
 PDF_JS_URL ?= https://github.com/kafva/pdf.js

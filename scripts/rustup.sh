@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-# FIREFOX_NIGHTLY_143_END does not compile with 1.90, stay on 1.89
-# |  help: the same lifetime is referred to in inconsistent ways,
-# |  making the signature confusing, help: use `'_` for type paths
-VERSION=1.89
+#
+# https://firefox-source-docs.mozilla.org/writing-rust-code/update-policy.html
+#
+VERSION=1.86
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
 bash -s -- -y \
