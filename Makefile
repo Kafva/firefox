@@ -88,15 +88,15 @@ build: $(MOZILLA_UNIFIED)/.patched
 	cat $(CURDIR)/conf/mozconfig_$(TARGET_UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
 	echo "ac_add_options --target=$(TARGET)" >> $(MOZILLA_UNIFIED)/mozconfig
 	mkdir -p $(OUT)
-	(cd $(MOZILLA_UNIFIED) && ./mach -l build.log build)
+	cd $(MOZILLA_UNIFIED) && ./mach --log-no-times -l build.log build
 ifeq ($(TARGET_UNAME),linux)
-	(cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install)
+	cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install
 	tar -C $(OUT)/firefox-nightly -cf - . | \
 		pzstd -f - -o $(OUT)/$(MOZILLA_UNIFIED_REV)-$(DISTRO)-$(TARGET).tar.zst
 	@echo "sudo cp -r $(OUT)/firefox-nightly/usr/* /usr"
 else ifeq ($(TARGET_UNAME),darwin)
 	@# Create installer .dmg
-	(cd $(MOZILLA_UNIFIED) && ./mach package)
+	cd $(MOZILLA_UNIFIED) && ./mach package
 	cp $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*.en-US.mac.dmg $(OUT)
 endif
 	$(call msg,Done)
