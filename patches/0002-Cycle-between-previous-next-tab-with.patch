@@ -1,0 +1,39 @@
+From e32ce543a9cd31ede8d5dfbe89e4250d5b7ca231 Mon Sep 17 00:00:00 2001
+From: Kafva <kafva.one@gmail.com>
+Date: Sat, 25 Oct 2025 18:20:05 +0200
+Subject: [PATCH 1/1] =?UTF-8?q?Cycle=20between=20previous/next=20tab=20wit?=
+ =?UTF-8?q?h=20=C3=B6/=C3=A4?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Vimium can map this for regular webpages but not inside pdf.js. I can
+only get switching tabs inside pdf.js working in Chrome, hardwire it for
+Firefox. This drastic approach makes switching work in about: pages as
+well. Note that ä/ö input will still be sent to focused text input
+fields.
+---
+ toolkit/modules/ShortcutUtils.sys.mjs | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/toolkit/modules/ShortcutUtils.sys.mjs b/toolkit/modules/ShortcutUtils.sys.mjs
+index 3e796cb6586a..1c3b83a17d0a 100644
+--- a/toolkit/modules/ShortcutUtils.sys.mjs
++++ b/toolkit/modules/ShortcutUtils.sys.mjs
+@@ -345,6 +345,13 @@ export var ShortcutUtils = {
+       !event.ctrlKey;
+ 
+     switch (event.keyCode) {
++      case 246: // 'ö'
++      case 186:
++      case 59:
++        return ShortcutUtils.PREVIOUS_TAB;
++      case 228: // 'ä'
++      case 222:
++        return ShortcutUtils.NEXT_TAB;
+       case event.DOM_VK_TAB:
+         if (event.ctrlKey && !event.altKey && !meaningfulMetaKey) {
+           return ShortcutUtils.CYCLE_TABS;
+-- 
+2.51.1
+
