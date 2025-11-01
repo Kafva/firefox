@@ -5,7 +5,5 @@ ac_add_options --prefix=/usr
 # Enable audio support
 ac_add_options --enable-alsa
 
-# Disable unused features
+# Disable networkmanager wifi integration
 ac_add_options --disable-necko-wifi
-ac_add_options --disable-dbus
-ac_add_options --disable-elf-hack
