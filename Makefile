@@ -146,6 +146,7 @@ release:
 	git tag -f $(TAG)
 	-git remote add gh git@github.com:Kafva/firefox.git 2> /dev/null
 	-git push -d gh $(TAG) 2> /dev/null
+	git push gh main
 	git push gh $(TAG)
 	-git push -d origin $(TAG) 2> /dev/null
 	git push origin $(TAG)
