@@ -45,6 +45,7 @@ WORKDIR /home/builder/firefox
 VOLUME /home/builder/firefox
 
 # Install rust
+COPY ./config.mk .
 COPY ./scripts/rustup.sh .
 RUN ./rustup.sh
 
