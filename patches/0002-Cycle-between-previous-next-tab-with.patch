@@ -1,4 +1,4 @@
-From 6653bf1a1094335289524ca098359b6a0117f800 Mon Sep 17 00:00:00 2001
+From 3ee87a0e428c54bf42d67b0fe88b9c59b83c39c5 Mon Sep 17 00:00:00 2001
 From: Kafva <kafva.one@gmail.com>
 Date: Sat, 25 Oct 2025 18:20:05 +0200
 Subject: [PATCH 1/1] =?UTF-8?q?Cycle=20between=20tabs=20with=20=C3=A4/?=
@@ -21,7 +21,7 @@ fields.
  1 file changed, 25 insertions(+)
 
 diff --git a/toolkit/modules/ShortcutUtils.sys.mjs b/toolkit/modules/ShortcutUtils.sys.mjs
-index 3e796cb6586a..5473d0761e92 100644
+index 3e796cb6586a..fdd6e5b54cbe 100644
 --- a/toolkit/modules/ShortcutUtils.sys.mjs
 +++ b/toolkit/modules/ShortcutUtils.sys.mjs
 @@ -344,7 +344,32 @@ export var ShortcutUtils = {
@@ -32,9 +32,9 @@ index 3e796cb6586a..5473d0761e92 100644
 +    let now = Math.floor(Date.now() / 1000);
 +    let tabSwitchActive = Services.prefs.getBoolPref("browser.tab_switch.active", false);
 +    let tabSwitchLastSet = Services.prefs.getIntPref("browser.tab_switch.time", 0);
-+    
++
      switch (event.keyCode) {
-+      case 219: // 'å'  
++      case 219: // 'å'
 +        if (event.altKey && meaningfulMetaKey && now > (tabSwitchLastSet + 2)) {
 +            Services.prefs.setIntPref("browser.tab_switch.time", now);
 +            Services.prefs.setBoolPref("browser.tab_switch.active", !tabSwitchActive);
@@ -58,5 +58,5 @@ index 3e796cb6586a..5473d0761e92 100644
          if (event.ctrlKey && !event.altKey && !meaningfulMetaKey) {
            return ShortcutUtils.CYCLE_TABS;
 -- 
-2.51.1
+2.51.2
 
