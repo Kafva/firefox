@@ -122,7 +122,20 @@ $(PDF_JS)/build/mozcentral: $(PDF_JS)/.cloned
 	cd $(PDF_JS) && npx gulp mozcentral
 
 
-################################################################################
+## Devel #######################################################################
+
+# Do not invoke mach manually, the build system will try to rebuild way too much
+# due to environment differences.
+#
+# Possible arguments for ac_add_options
+# 	./configure --help
+
+mach-ccdb:
+	cd $(MOZILLA_UNIFIED) && ./mach build-backend --backend=CompileDB
+
+mach-run:
+	@mkdir -p $(MOZILLA_UNIFIED)/.my_profile
+	cd $(MOZILLA_UNIFIED) && ./mach run -n -- --profile ./.my_profile
 
 unpatch:
 	rm -f $(MOZILLA_UNIFIED)/.patched

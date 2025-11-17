@@ -61,20 +61,5 @@ npx gulp mozcentral
     zip "/usr/lib/firefox/omni.ja" 'chrome/*')
 ```
 
-Useful commands for the mozilla-unified build system:
-```bash
-# (clean)
-./mach clobber
-
-# Generate compile_commands.json
-./mach build-backend --backend=CompileDB
-
-# Custom user.js can be put in ./my_profile
-./mach run -n -- --profile ./my_profile
-
-# Possible arguments for ac_add_options
-./configure --help
-```
-
 To reuse the same profile after downgrading Firefox, delete
 `~/.mozilla/firefox/$PROFILE/compatibility.ini`.

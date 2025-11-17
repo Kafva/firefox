@@ -3,8 +3,8 @@ MOZILLA_UNIFIED_URL := https://github.com/mozilla-firefox/firefox.git
 export MOZILLA_UNIFIED_REV ?= FIREFOX_143_0_4_RELEASE
 
 PDF_JS := $(CURDIR)/pdf.js
-PDF_JS_URL ?= https://github.com/kafva/pdf.js
-PDF_JS_REV ?= 2538a9b889152c278cc519edb40abc35e59000f6
+PDF_JS_URL ?= https://codeberg.org/kafva/pdf.js
+PDF_JS_REV ?= 9274a5b0f05fd919d6d2b809e6053dd287864867
 
 # https://firefox-source-docs.mozilla.org/writing-rust-code/update-policy.html
 RUST_VERSION = 1.86
@@ -28,7 +28,7 @@ export TARGET_UNAME := linux
 export DISTRO := arch
 export TARGET ?= x86_64-linux-gnu
 
-else ifeq ($(filter _build all clean distclean patch unpatch release,$(MAKECMDGOALS)),)
+else ifeq ($(filter _build all mach-run mach-ccdb clean distclean patch unpatch release,$(MAKECMDGOALS)),)
 $(error Invalid build target)
 endif
 

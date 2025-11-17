@@ -1,4 +1,4 @@
-From 6653bf1a1094335289524ca098359b6a0117f800 Mon Sep 17 00:00:00 2001
+From c10894ba6f2c2287a67f8fadf925ebce22560bf1 Mon Sep 17 00:00:00 2001
 From: Kafva <kafva.one@gmail.com>
 Date: Sat, 25 Oct 2025 18:20:05 +0200
 Subject: [PATCH 1/1] =?UTF-8?q?Cycle=20between=20tabs=20with=20=C3=A4/?=
@@ -17,14 +17,27 @@ mappings for switching tabs and an additional key to disable the special
 behaviour. Note that ä/ö input will still be sent to focused text input
 fields.
 ---
- toolkit/modules/ShortcutUtils.sys.mjs | 25 +++++++++++++++++++++++++
- 1 file changed, 25 insertions(+)
+ modules/libpref/init/all.js           |  4 ++++
+ toolkit/modules/ShortcutUtils.sys.mjs | 29 +++++++++++++++++++++++++++
+ 2 files changed, 33 insertions(+)
 
+diff --git a/modules/libpref/init/all.js b/modules/libpref/init/all.js
+index 430279363acf..d76135b242b3 100644
+--- a/modules/libpref/init/all.js
++++ b/modules/libpref/init/all.js
+@@ -4116,3 +4116,7 @@ pref("captchadetection.actor.enabled", true);
+ // Make general.smoothScroll sticky to avoid being clobbered by
+ // preferes-reduced-motion system setting.
+ pref("general.smoothScroll", true, sticky);
++
++// Custom tab switch shortcuts
++pref("browser.tab_switch.active", false);
++pref("browser.tab_switch.time", 0);
 diff --git a/toolkit/modules/ShortcutUtils.sys.mjs b/toolkit/modules/ShortcutUtils.sys.mjs
-index 3e796cb6586a..5473d0761e92 100644
+index 3e796cb6586a..5d6239c8a405 100644
 --- a/toolkit/modules/ShortcutUtils.sys.mjs
 +++ b/toolkit/modules/ShortcutUtils.sys.mjs
-@@ -344,7 +344,32 @@ export var ShortcutUtils = {
+@@ -344,6 +344,35 @@ export var ShortcutUtils = {
        !event.shiftKey &&
        !event.ctrlKey;
  
@@ -32,31 +45,34 @@ index 3e796cb6586a..5473d0761e92 100644
 +    let now = Math.floor(Date.now() / 1000);
 +    let tabSwitchActive = Services.prefs.getBoolPref("browser.tab_switch.active", false);
 +    let tabSwitchLastSet = Services.prefs.getIntPref("browser.tab_switch.time", 0);
-+    
-     switch (event.keyCode) {
-+      case 219: // 'å'  
++
++    // Note: "'" has the same keyCode as "ä"
++    // Note: the 'key' field differs when modifier keys are present.
++    switch (event.key) {
++      case '\u02D9': // macOS: key=\u02D9 keyCode=219
 +        if (event.altKey && meaningfulMetaKey && now > (tabSwitchLastSet + 2)) {
 +            Services.prefs.setIntPref("browser.tab_switch.time", now);
 +            Services.prefs.setBoolPref("browser.tab_switch.active", !tabSwitchActive);
 +            console.log(`browser.tab_switch.active = ${!tabSwitchActive}`)
++        } else {
++            console.log(`no switch: ${now} ${tabSwitchLastSet}`);
 +        }
 +        return null;
-+      case 246: // 'ö'
-+      case 186:
-+      case 59:
++        case 'ö': // macOS: key=\xF6 keyCode=59
 +        if (tabSwitchActive) {
 +            return ShortcutUtils.PREVIOUS_TAB;
 +        }
 +        break;
-+      case 228: // 'ä'
-+      case 222:
++      case 'ä': // macOS: key=\xE4 keyCode=222
 +        if (tabSwitchActive) {
 +            return ShortcutUtils.NEXT_TAB;
 +        }
 +        break;
++    }
++
+     switch (event.keyCode) {
        case event.DOM_VK_TAB:
          if (event.ctrlKey && !event.altKey && !meaningfulMetaKey) {
-           return ShortcutUtils.CYCLE_TABS;
 -- 
-2.51.1
+2.51.2
 
