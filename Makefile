@@ -162,6 +162,8 @@ release:
 	git push gh $(TAG)
 	git push -d origin $(TAG) 2> /dev/null || :
 	git push origin $(TAG)
+	@# Make sure release has been created server side
+	sleep 10
 	gh release create $(TAG) $(wildcard out/macos/*.dmg)
 	gh release upload $(TAG) $(wildcard out/*/*.tar.zst)
 
