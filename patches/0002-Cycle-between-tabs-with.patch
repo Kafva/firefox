@@ -1,6 +1,6 @@
-From c10894ba6f2c2287a67f8fadf925ebce22560bf1 Mon Sep 17 00:00:00 2001
+From 04b8440c9e8043c52837cb7c0183b16e7ed71896 Mon Sep 17 00:00:00 2001
 From: Kafva <kafva.one@gmail.com>
-Date: Sat, 25 Oct 2025 18:20:05 +0200
+Date: Mon, 1 Dec 2025 06:36:45 +0100
 Subject: [PATCH 1/1] =?UTF-8?q?Cycle=20between=20tabs=20with=20=C3=A4/?=
  =?UTF-8?q?=C3=B6?=
 MIME-Version: 1.0
@@ -34,7 +34,7 @@ index 430279363acf..d76135b242b3 100644
 +pref("browser.tab_switch.active", false);
 +pref("browser.tab_switch.time", 0);
 diff --git a/toolkit/modules/ShortcutUtils.sys.mjs b/toolkit/modules/ShortcutUtils.sys.mjs
-index 3e796cb6586a..5d6239c8a405 100644
+index 3e796cb6586a..489b9f58f1c3 100644
 --- a/toolkit/modules/ShortcutUtils.sys.mjs
 +++ b/toolkit/modules/ShortcutUtils.sys.mjs
 @@ -344,6 +344,35 @@ export var ShortcutUtils = {
@@ -49,8 +49,8 @@ index 3e796cb6586a..5d6239c8a405 100644
 +    // Note: "'" has the same keyCode as "ä"
 +    // Note: the 'key' field differs when modifier keys are present.
 +    switch (event.key) {
-+      case '\u02D9': // macOS: key=\u02D9 keyCode=219
-+        if (event.altKey && meaningfulMetaKey && now > (tabSwitchLastSet + 2)) {
++      case '\xE5': // macOS: key=\xE5 keyCode=219
++        if (event.shiftKey && meaningfulMetaKey && now > (tabSwitchLastSet + 2)) {
 +            Services.prefs.setIntPref("browser.tab_switch.time", now);
 +            Services.prefs.setBoolPref("browser.tab_switch.active", !tabSwitchActive);
 +            console.log(`browser.tab_switch.active = ${!tabSwitchActive}`)
@@ -74,5 +74,5 @@ index 3e796cb6586a..5d6239c8a405 100644
        case event.DOM_VK_TAB:
          if (event.ctrlKey && !event.altKey && !meaningfulMetaKey) {
 -- 
-2.51.2
+2.52.0
 
