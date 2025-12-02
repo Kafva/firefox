@@ -164,7 +164,7 @@ release:
 	git push origin $(TAG)
 	@# Make sure release has been created server side
 	sleep 10
-	gh release create $(TAG) $(wildcard out/macos/*.dmg)
+	gh release create --notes-from-tag --title $(TAG) $(TAG) $(wildcard out/macos/*.dmg)
 	gh release upload $(TAG) $(wildcard out/*/*.tar.zst)
 
 distclean:
