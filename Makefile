@@ -133,6 +133,9 @@ $(PDF_JS)/build/mozcentral: $(PDF_JS)/.cloned
 mach-ccdb:
 	cd $(MOZILLA_UNIFIED) && ./mach build-backend --backend=CompileDB
 
+mach-build:
+	cd $(MOZILLA_UNIFIED) && ./mach build && DESTDIR="$(OUT)/firefox-nightly" ./mach install
+
 mach-run:
 	@mkdir -p $(MOZILLA_UNIFIED)/.my_profile
 	cd $(MOZILLA_UNIFIED) && ./mach run -n -- --profile ./.my_profile

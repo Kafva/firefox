@@ -28,7 +28,7 @@ export TARGET_UNAME := linux
 export DISTRO := arch
 export TARGET ?= x86_64-linux-gnu
 
-else ifeq ($(filter _build all mach-run mach-ccdb clean distclean patch unpatch release,$(MAKECMDGOALS)),)
+else ifeq ($(filter _build all mach-run mach-build mach-ccdb clean distclean patch unpatch release,$(MAKECMDGOALS)),)
 $(error Invalid build target)
 endif
 
