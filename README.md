@@ -63,3 +63,8 @@ npx gulp mozcentral
 
 To reuse the same profile after downgrading Firefox, delete
 `~/.mozilla/firefox/$PROFILE/compatibility.ini`.
+
+`console.log()` output from internal Javascript in Firefox should be visible by
+default on stdout, `./mach run` is not doing any extra magic for this to
+happen, it is part of the binary itself. To run with additional Javascript
+logging use `MOZ_LOG=console:5`.
