@@ -1,6 +1,6 @@
 MOZILLA_UNIFIED := $(CURDIR)/mozilla-unified
 MOZILLA_UNIFIED_URL := https://github.com/mozilla-firefox/firefox.git
-export MOZILLA_UNIFIED_REV ?= FIREFOX_143_0_4_RELEASE
+export MOZILLA_UNIFIED_REV ?= FIREFOX_147_0_3_RELEASE
 
 PDF_JS := $(CURDIR)/pdf.js
 PDF_JS_URL ?= https://codeberg.org/kafva/pdf.js
@@ -28,7 +28,7 @@ export TARGET_UNAME := linux
 export DISTRO := arch
 export TARGET ?= x86_64-linux-gnu
 
-else ifeq ($(filter _build all mach-run mach-build mach-ccdb clean distclean patch unpatch release,$(MAKECMDGOALS)),)
+else ifeq ($(filter _build all source pdfjs mach-run mach-build mach-ccdb clean distclean patch unpatch release,$(MAKECMDGOALS)),)
 $(error Invalid build target)
 endif
 

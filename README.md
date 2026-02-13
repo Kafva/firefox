@@ -3,6 +3,11 @@ Build Firefox with patches and a custom pdf.js version on Linux and macOS. To
 use your own patches, place them under `./patches` before starting the build.
 Configuration variables for the build are set in `config.mk`.
 
+To build for all supported platforms:
+```bash
+make all
+```
+
 ## Linux
 Linux targets can be built from both Linux and macOS via containers.
 
