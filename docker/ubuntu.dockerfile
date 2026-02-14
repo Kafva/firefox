@@ -39,7 +39,7 @@ RUN ln -fns /usr/bin/ccache /usr/sbin/ccache
 RUN ln -fns /usr/bin/make /usr/sbin/make
 
 # The nodejs version in 24.04 is too old
-RUN curl "https://nodejs.org/dist/v20.12.1/node-v20.12.1-linux-x64.tar.xz" | tar -xJf - -C /usr --strip-components=1
+RUN curl "https://nodejs.org/dist/v25.5.0/node-v25.5.0-linux-x64.tar.xz" | tar -xJf - -C /usr --strip-components=1
 
 # Create build user with matching UID/GID to outside user
 RUN userdel ubuntu
