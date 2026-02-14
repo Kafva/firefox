@@ -12,10 +12,10 @@ make all
 Linux targets can be built from both Linux and macOS via containers.
 
 ```bash
-make $DISTRO
+make DIST=$DIST build
 ```
 
-Supported `DISTRO` values:
+Supported `DIST` values:
 * `ubuntu`
 * `archlinux`
 
@@ -47,7 +47,7 @@ brew bundle install --file conf/Brewfile
 
 3. Build
 ```bash
-make macos
+make DIST=macos build
 ```
 
 ## Tips

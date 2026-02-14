@@ -1,49 +1,96 @@
 include config.mk
 
-.PHONY: build
-
-build:
-
-source: $(MOZILLA_UNIFIED)/.cloned \
-	    $(PDF_JS)/.cloned
-
 define msg
 	@printf "\033[3m>>>> $(1)\033[0m\n"
 endef
 
-# $1: Distribution name
-# $2: Extra docker flags
-# NOTE: Variables need to be explicitly passed via `-e` here to take effect!
-define docker_run
-	$(CONTAINER_BUILD) \
-		--build-arg BUILDER_UID=$(shell id -u) \
-		--build-arg BUILDER_GID=$(shell id -g) \
-		-f docker/${1}.dockerfile -t $(IMAGE_NAME):${1} $(CURDIR)
-	$(CONTAINER_RUN) -it -u $(shell id -u):$(shell id -g) --rm \
-		-e MOZILLA_UNIFIED_REV=$(MOZILLA_UNIFIED_REV) \
-		-e TARGET=$(TARGET) \
-		-e TARGET_UNAME=$(TARGET_UNAME) \
-		-e DISTRO=$(DISTRO) \
-		-e OUT=$(OUT) \
-		${2} \
-		--mount type=bind,src=$(CURDIR),dst=/home/builder/firefox,ro=false \
-		$(IMAGE_NAME):${1}
+# $1: Current working directory in container
+# $2: Command line to execute
+define container_run
+	@if [ -z "$(DIST)" ]; then \
+		echo "No DIST set"; \
+		exit 1; \
+	elif [ "$(DIST)" = macos ]; then \
+		cd ${1} && ${2}; \
+	else \
+		$(CONTAINER_BUILD) \
+			--build-arg BUILDER_UID=$(shell id -u) \
+			--build-arg BUILDER_GID=$(shell id -g) \
+			-f docker/$(DIST).dockerfile -t $(IMAGE_NAME):$(DIST) $(CURDIR); \
+		$(CONTAINER_RUN) -it -u $(shell id -u):$(shell id -g) --rm \
+			-e DIST=$(DIST) \
+			-e TARGET=$(TARGET) \
+			--mount type=bind,src=$(CURDIR),dst=$(CONTAINER_MNT),ro=false \
+			-w ${1} \
+			$(IMAGE_NAME):$(DIST) /bin/bash -c "${2}"; \
+	fi
 endef
 
-### targets ####################################################################
-macos: build
+## targets #####################################################################
 
-ubuntu: docker/ubuntu.dockerfile
-	$(call docker_run,ubuntu)
+source: $(MOZILLA_UNIFIED)/.cloned $(PDF_JS)/.cloned
 
-ubuntu-shell: docker/ubuntu.dockerfile
-	$(call docker_run,ubuntu,--entrypoint /bin/bash)
+shell: $(wildcard docker/*.dockerfile)
+	$(call container_run,$(CONTAINER_MNT),bash)
 
-archlinux: docker/archlinux.dockerfile
-	$(call docker_run,archlinux)
+build:
+	$(call container_run,$(CONTAINER_MNT),$(MAKE) _build 2>&1 | \
+		tee ./mozilla-unified/build-$(shell date '+%Y-%m-%d-%H-%M').log)
 
-archlinux-shell: docker/archlinux.dockerfile
-	$(call docker_run,archlinux,--entrypoint /bin/bash)
+all:
+ifeq ($(shell uname),Darwin)
+	$(MAKE) DIST=macos clean
+	$(MAKE) DIST=macos build
+endif
+	$(MAKE) DIST=ubuntu clean
+	$(MAKE) DIST=ubuntu build
+
+	$(MAKE) DIST=archlinux clean
+	$(MAKE) DIST=archlinux build
+
+release:
+	git tag -f $(TAG)
+	git remote add gh git@github.com:Kafva/firefox.git 2> /dev/null || :
+	git push -d gh $(TAG) 2> /dev/null || :
+	git push gh $(TAG)
+	git push -d origin $(TAG) 2> /dev/null || :
+	git push origin $(TAG)
+	@# Make sure release has been created server side
+	sleep 10
+	gh release create --notes-from-tag --title $(TAG) $(TAG) $(wildcard out/macos/*.dmg)
+	gh release upload $(TAG) $(wildcard out/*/*.tar.zst)
+
+unpatch:
+	rm -f $(MOZILLA_UNIFIED)/.patched
+
+clean: unpatch
+	-cd $(PDF_JS) 2> /dev/null && rm -rf build
+	$(call container_run,$(CONTAINER_MOZILLA),./mach clobber)
+
+distclean:
+	rm -rf $(MOZILLA_UNIFIED) $(PDF_JS)
+
+## mach ########################################################################
+
+# Do not invoke mach manually, the build system will try to rebuild way too much
+# due to environment differences.
+#
+# Possible arguments for ac_add_options
+# 	./configure --help
+
+mach-ccdb:
+	$(call container_run,$(CONTAINER_MOZILLA),\
+		./mach build-backend --backend=CompileDB)
+
+mach-build:
+	$(call container_run,$(CONTAINER_MOZILLA),\
+		./mach build && \
+		DESTDIR="$(CONTAINER_MNT)/out/$(DIST)/firefox-nightly" ./mach install)
+
+mach-run:
+	@# No container wrapper when launching firefox
+	@mkdir -p $(MOZILLA_UNIFIED)/.my_profile
+	cd $(MOZILLA_UNIFIED) && ./mach run -n -- --profile ./.my_profile
 
 ### firefox ####################################################################
 $(MOZILLA_UNIFIED)/.cloned:
@@ -81,11 +128,8 @@ $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED)/.cloned $(PDF_JS)/build/mozcentr
 	git -C $(@D) add toolkit/components/pdfjs
 	touch $@
 
-build:
-	$(MAKE) _build 2>&1 | tee $(MOZILLA_UNIFIED)/build-$(shell date '+%Y-%m-%d-%H-%M').log
-
 _build: $(MOZILLA_UNIFIED)/.patched
-	$(call msg,Building target $(DISTRO) $(TARGET_UNAME) $(TARGET))
+	$(call msg,Building target $(DIST) $(TARGET_UNAME) $(TARGET))
 	@# Set rust toolchain version
 	rustup default $(RUST_VERSION)
 	@# Add our mozconfig
@@ -97,7 +141,7 @@ _build: $(MOZILLA_UNIFIED)/.patched
 ifeq ($(TARGET_UNAME),linux)
 	cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install
 	tar -C $(OUT)/firefox-nightly -cf - . | \
-		pzstd -f - -o $(OUT)/$(MOZILLA_UNIFIED_REV)-$(DISTRO)-$(TARGET).tar.zst
+		pzstd -f - -o $(OUT)/$(MOZILLA_UNIFIED_REV)-$(DIST)-$(TARGET).tar.zst
 	@echo "sudo cp -r $(OUT)/firefox-nightly/usr/* /usr"
 else ifeq ($(TARGET_UNAME),darwin)
 	@# Create installer .dmg
@@ -109,8 +153,6 @@ endif
 	$(call msg,Done)
 
 ### pdf.js #####################################################################
-pdfjs: $(PDF_JS)/build/mozcentral
-
 $(PDF_JS)/.cloned:
 	git clone $(GIT_CLONE_ARGS) $(PDF_JS_URL) $(@D)
 	touch $@
@@ -120,55 +162,3 @@ $(PDF_JS)/build/mozcentral: $(PDF_JS)/.cloned
 	git -C $(PDF_JS) checkout $(PDF_JS_REV)
 	cd $(PDF_JS) && npm install --legacy-peer-deps --ignore-scripts
 	cd $(PDF_JS) && npx gulp mozcentral
-
-
-## Devel #######################################################################
-
-# Do not invoke mach manually, the build system will try to rebuild way too much
-# due to environment differences.
-#
-# Possible arguments for ac_add_options
-# 	./configure --help
-
-mach-ccdb:
-	cd $(MOZILLA_UNIFIED) && ./mach build-backend --backend=CompileDB
-
-mach-build:
-	cd $(MOZILLA_UNIFIED) && ./mach build && DESTDIR="$(OUT)/firefox-nightly" ./mach install
-
-mach-run:
-	@mkdir -p $(MOZILLA_UNIFIED)/.my_profile
-	cd $(MOZILLA_UNIFIED) && ./mach run -n -- --profile ./.my_profile
-
-unpatch:
-	rm -f $(MOZILLA_UNIFIED)/.patched
-
-clean: unpatch
-	-cd $(MOZILLA_UNIFIED) 2> /dev/null && ./mach clobber
-	-cd $(PDF_JS) 2> /dev/null && rm -rf build
-
-all:
-ifeq ($(shell uname),Darwin)
-	$(MAKE) clean
-	$(MAKE) macos
-endif
-	$(MAKE) clean
-	$(MAKE) ubuntu
-
-	$(MAKE) clean
-	$(MAKE) archlinux
-
-release:
-	git tag -f $(TAG)
-	git remote add gh git@github.com:Kafva/firefox.git 2> /dev/null || :
-	git push -d gh $(TAG) 2> /dev/null || :
-	git push gh $(TAG)
-	git push -d origin $(TAG) 2> /dev/null || :
-	git push origin $(TAG)
-	@# Make sure release has been created server side
-	sleep 10
-	gh release create --notes-from-tag --title $(TAG) $(TAG) $(wildcard out/macos/*.dmg)
-	gh release upload $(TAG) $(wildcard out/*/*.tar.zst)
-
-distclean:
-	rm -rf $(MOZILLA_UNIFIED) $(PDF_JS)

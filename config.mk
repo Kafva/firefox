@@ -9,27 +9,28 @@ PDF_JS_REV ?= 5a127574ea0b0b1550324e4f84ceebcd006ae019
 # https://firefox-source-docs.mozilla.org/writing-rust-code/update-policy.html
 RUST_VERSION = 1.86
 
+CONTAINER_MNT = /home/builder/firefox
+CONTAINER_MOZILLA = $(CONTAINER_MNT)/mozilla-unified
+
 # Target settings
-ifneq ($(filter macos,$(MAKECMDGOALS)),)
+ifeq ($(DIST),macos)
 export TARGET_UNAME := darwin
-export DISTRO := macos
 export TARGET ?= aarch64-apple-darwin
 export LDFLAGS := -L/usr/local/opt/llvm/lib
 export CPPFLAGS := -I/usr/local/opt/llvm/include
 export PATH := /usr/local/opt/llvm/bin:${PATH}
 
-else ifneq ($(filter ubuntu ubuntu-shell,$(MAKECMDGOALS)),)
+# macos target is not built inside a container
+CONTAINER_MNT = $(CURDIR)
+CONTAINER_MOZILLA = $(MOZILLA_UNIFIED)
+
+else ifeq ($(DIST),ubuntu)
 export TARGET_UNAME := linux
-export DISTRO := ubuntu
 export TARGET ?= x86_64-linux-gnu
 
-else ifneq ($(filter archlinux archlinux-shell,$(MAKECMDGOALS)),)
+else ifeq ($(DIST),archlinux)
 export TARGET_UNAME := linux
-export DISTRO := arch
 export TARGET ?= x86_64-linux-gnu
-
-else ifeq ($(filter _build all source pdfjs mach-run mach-build mach-ccdb clean distclean patch unpatch release,$(MAKECMDGOALS)),)
-$(error Invalid build target)
 endif
 
 # Host settings
@@ -57,7 +58,7 @@ export MOZ_SOURCE_CHANGESET = $(MOZILLA_UNIFIED_REV)
 export MOZ_BUILD_DATE = $(shell date '+%Y%m%d%H%M%S')
 export MH_BRANCH = $(MOZILLA_UNIFIED_REV)
 
-export OUT := $(CURDIR)/out/$(DISTRO)
+export OUT := $(CURDIR)/out/$(DIST)
 
 # Container image name, different tags for different distros
 IMAGE_NAME := firefox-builder
