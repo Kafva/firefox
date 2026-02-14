@@ -7,30 +7,23 @@ PDF_JS_URL ?= https://codeberg.org/kafva/pdf.js
 PDF_JS_REV ?= 5a127574ea0b0b1550324e4f84ceebcd006ae019
 
 # https://firefox-source-docs.mozilla.org/writing-rust-code/update-policy.html
-RUST_VERSION = 1.86
-
-CONTAINER_MNT = /home/builder/firefox
-CONTAINER_MOZILLA = $(CONTAINER_MNT)/mozilla-unified
+RUST_VERSION = 1.90
 
 # Target settings
-ifeq ($(DIST),macos)
+ifeq ($(TARGET),macos)
 export TARGET_UNAME := darwin
-export TARGET ?= aarch64-apple-darwin
-export LDFLAGS := -L/usr/local/opt/llvm/lib
-export CPPFLAGS := -I/usr/local/opt/llvm/include
+export TARGET_TRIPLE ?= aarch64-apple-darwin
+# export LDFLAGS := -L/usr/local/opt/llvm/lib
+# export CPPFLAGS := -I/usr/local/opt/llvm/include
 export PATH := /usr/local/opt/llvm/bin:${PATH}
 
-# macos target is not built inside a container
-CONTAINER_MNT = $(CURDIR)
-CONTAINER_MOZILLA = $(MOZILLA_UNIFIED)
-
-else ifeq ($(DIST),ubuntu)
+else ifeq ($(TARGET),ubuntu)
 export TARGET_UNAME := linux
-export TARGET ?= x86_64-linux-gnu
+export TARGET_TRIPLE ?= x86_64-linux-gnu
 
-else ifeq ($(DIST),archlinux)
+else ifeq ($(TARGET),archlinux)
 export TARGET_UNAME := linux
-export TARGET ?= x86_64-linux-gnu
+export TARGET_TRIPLE ?= x86_64-linux-gnu
 endif
 
 # Host settings
@@ -46,6 +39,15 @@ else
 $(error Unsupported host platform)
 endif
 
+# Paths that differ depending on if we build inside our outside a container
+ifneq ($(findstring $(TARGET),macos archlinux),)
+export CONTAINER_MNT = $(CURDIR)
+export CONTAINER_MOZILLA = $(MOZILLA_UNIFIED)
+else
+export CONTAINER_MNT = /home/builder/firefox
+export CONTAINER_MOZILLA = $(CONTAINER_MNT)/mozilla-unified
+endif
+
 # Tag for new build
 TAG ?= $(shell date '+%Y.%m.%d')
 
@@ -58,13 +60,13 @@ export MOZ_SOURCE_CHANGESET = $(MOZILLA_UNIFIED_REV)
 export MOZ_BUILD_DATE = $(shell date '+%Y%m%d%H%M%S')
 export MH_BRANCH = $(MOZILLA_UNIFIED_REV)
 
-export OUT := $(CURDIR)/out/$(DIST)
+export OUT := $(CURDIR)/out/$(TARGET)
 
 # Container image name, different tags for different distros
 IMAGE_NAME := firefox-builder
 
 # Make sure rust toolchain is found
-export PATH := ${HOME}/.cargo/bin:${PATH}
+export PATH := $(HOME)/.cargo/bin:$(PATH)
 
 # Extra arguments for clone
 export GIT_CLONE_ARGS ?=

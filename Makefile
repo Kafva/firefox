@@ -1,52 +1,52 @@
 include config.mk
 
+.PHONY: build all source shell release unpatch patch
+
 define msg
 	@printf "\033[3m>>>> $(1)\033[0m\n"
 endef
 
-# $1: Current working directory in container
+# $1: Cwd to use
 # $2: Command line to execute
-define container_run
-	@if [ -z "$(DIST)" ]; then \
-		echo "No DIST set"; \
+define run
+	@if [ -z "$(TARGET)" ]; then \
+		echo "No TARGET set"; \
 		exit 1; \
-	elif [ "$(DIST)" = macos ]; then \
+	elif [ "$(TARGET)" = macos ] || [ "$(TARGET)" = archlinux ]; then \
 		cd ${1} && ${2}; \
 	else \
 		$(CONTAINER_BUILD) \
 			--build-arg BUILDER_UID=$(shell id -u) \
 			--build-arg BUILDER_GID=$(shell id -g) \
-			-f docker/$(DIST).dockerfile -t $(IMAGE_NAME):$(DIST) $(CURDIR); \
+			-f docker/$(TARGET).dockerfile -t $(IMAGE_NAME):$(TARGET) $(CURDIR); \
 		$(CONTAINER_RUN) -it -u $(shell id -u):$(shell id -g) --rm \
-			-e DIST=$(DIST) \
 			-e TARGET=$(TARGET) \
+			-e TARGET_TRIPLE=$(TARGET_TRIPLE) \
 			--mount type=bind,src=$(CURDIR),dst=$(CONTAINER_MNT),ro=false \
 			-w ${1} \
-			$(IMAGE_NAME):$(DIST) /bin/bash -c "${2}"; \
+			$(IMAGE_NAME):$(TARGET) /bin/bash -c "${2}"; \
 	fi
 endef
-
-## targets #####################################################################
 
 source: $(MOZILLA_UNIFIED)/.cloned $(PDF_JS)/.cloned
 
 shell: $(wildcard docker/*.dockerfile)
-	$(call container_run,$(CONTAINER_MNT),bash)
+	$(call run,$(CONTAINER_MNT),bash)
 
 build:
-	$(call container_run,$(CONTAINER_MNT),$(MAKE) _build 2>&1 | \
+	$(call run,$(CONTAINER_MNT),$(MAKE) _build 2>&1 | \
 		tee ./mozilla-unified/build-$(shell date '+%Y-%m-%d-%H-%M').log)
 
 all:
 ifeq ($(shell uname),Darwin)
-	$(MAKE) DIST=macos clean
-	$(MAKE) DIST=macos build
+	$(MAKE) TARGET=macos clean
+	$(MAKE) TARGET=macos build
 endif
-	$(MAKE) DIST=ubuntu clean
-	$(MAKE) DIST=ubuntu build
+	$(MAKE) TARGET=ubuntu clean
+	$(MAKE) TARGET=ubuntu build
 
-	$(MAKE) DIST=archlinux clean
-	$(MAKE) DIST=archlinux build
+	$(MAKE) TARGET=archlinux clean
+	$(MAKE) TARGET=archlinux build
 
 release:
 	git tag -f $(TAG)
@@ -58,41 +58,22 @@ release:
 	@# Make sure release has been created server side
 	sleep 10
 	gh release create --notes-from-tag --title $(TAG) $(TAG) $(wildcard out/macos/*.dmg)
-	gh release upload $(TAG) $(wildcard out/*/*.tar.zst)
+	gh release upload $(TAG) $(wildcard out/*/*.tar.xz)
 
 unpatch:
 	rm -f $(MOZILLA_UNIFIED)/.patched
 
+env:
+	@env
+
 clean: unpatch
 	-cd $(PDF_JS) 2> /dev/null && rm -rf build
-	$(call container_run,$(CONTAINER_MOZILLA),./mach clobber)
+	$(call run,$(CONTAINER_MOZILLA),./mach clobber)
 
 distclean:
 	rm -rf $(MOZILLA_UNIFIED) $(PDF_JS)
 
-## mach ########################################################################
-
-# Do not invoke mach manually, the build system will try to rebuild way too much
-# due to environment differences.
-#
-# Possible arguments for ac_add_options
-# 	./configure --help
-
-mach-ccdb:
-	$(call container_run,$(CONTAINER_MOZILLA),\
-		./mach build-backend --backend=CompileDB)
-
-mach-build:
-	$(call container_run,$(CONTAINER_MOZILLA),\
-		./mach build && \
-		DESTDIR="$(CONTAINER_MNT)/out/$(DIST)/firefox-nightly" ./mach install)
-
-mach-run:
-	@# No container wrapper when launching firefox
-	@mkdir -p $(MOZILLA_UNIFIED)/.my_profile
-	cd $(MOZILLA_UNIFIED) && ./mach run -n -- --profile ./.my_profile
-
-### firefox ####################################################################
+### Firefox ####################################################################
 $(MOZILLA_UNIFIED)/.cloned:
 	$(call msg,Fetching firefox source)
 	git clone $(GIT_CLONE_ARGS) $(MOZILLA_UNIFIED_URL) $(@D)
@@ -129,24 +110,21 @@ $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED)/.cloned $(PDF_JS)/build/mozcentr
 	touch $@
 
 _build: $(MOZILLA_UNIFIED)/.patched
-	$(call msg,Building target $(DIST) $(TARGET_UNAME) $(TARGET))
+	$(call msg,Building target $(TARGET) $(TARGET_UNAME) $(TARGET_TRIPLE))
 	@# Set rust toolchain version
 	rustup default $(RUST_VERSION)
 	@# Add our mozconfig
 	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
 	cat $(CURDIR)/conf/mozconfig_$(TARGET_UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
-	echo "ac_add_options --target=$(TARGET)" >> $(MOZILLA_UNIFIED)/mozconfig
-	mkdir -p $(OUT)
+	echo "ac_add_options --target=$(TARGET_TRIPLE)" >> $(MOZILLA_UNIFIED)/mozconfig
 	cd $(MOZILLA_UNIFIED) && ./mach build
-ifeq ($(TARGET_UNAME),linux)
-	cd $(MOZILLA_UNIFIED) && DESTDIR="$(OUT)/firefox-nightly" ./mach install
-	tar -C $(OUT)/firefox-nightly -cf - . | \
-		pzstd -f - -o $(OUT)/$(MOZILLA_UNIFIED_REV)-$(DIST)-$(TARGET).tar.zst
-	@echo "sudo cp -r $(OUT)/firefox-nightly/usr/* /usr"
-else ifeq ($(TARGET_UNAME),darwin)
-	@# Create installer .dmg
 	cd $(MOZILLA_UNIFIED) && ./mach package
-	cp $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*.en-US.mac.dmg $(OUT)
+	mkdir -p $(OUT)
+ifeq ($(TARGET_UNAME),linux)
+	cp $(MOZILLA_UNIFIED)/obj-*-linux-*/dist/firefox-*.linux-*.tar.xz \
+	   $(OUT)/$(MOZILLA_UNIFIED_REV)-$(TARGET)-$(TARGET_TRIPLE).tar.xz
+else ifeq ($(TARGET_UNAME),darwin)
+	cp $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*.en-US.mac.dmg $(OUT)/
 endif
 	@# Restore default toolchain
 	rustup default stable
