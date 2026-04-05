@@ -25,8 +25,8 @@ The macOS target can only be built from a macOS host. The default configuration
 in the repository compiles for arm64. You need at least 64 GB of disk. Setup
 from a fresh install:
 
-1. Setup Xcode, can be downloaded from
-   [here](https://xcodereleases.com/) (Apple ID required)
+1. Setup Xcode, can be downloaded from [here](https://xcodereleases.com/)
+   (Apple ID required)
 ```bash
 xcode-select --install
 
