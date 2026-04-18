@@ -5,7 +5,9 @@ ARG BUILDER_GID=${BUILDER_GID:-1000}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN <<EOF
+apt-get update
+apt-get install -y \
     lsb-release \
     sudo \
     build-essential \
@@ -31,8 +33,9 @@ RUN apt-get update && apt-get install -y \
     lld \
     rsync
 
-# Cleanup cache
-RUN rm -rf /var/lib/apt/lists/*
+rm -rf /var/lib/apt/
+rm -rf /var/cache/apt/
+EOF
 
 # HINT: `./mach build` dies with: No such file or directory: '/usr/sbin/*'
 RUN ln -fns /usr/bin/ccache /usr/sbin/ccache
