@@ -18,13 +18,13 @@ define run
 		$(CONTAINER_BUILD) \
 			--build-arg BUILDER_UID=$(shell id -u) \
 			--build-arg BUILDER_GID=$(shell id -g) \
-			-f docker/$(TARGET).dockerfile -t $(IMAGE_NAME):$(TARGET) $(CURDIR); \
+			-f docker/$(TARGET).dockerfile -t firefox-builder:$(TARGET) $(CURDIR); \
 		$(CONTAINER_RUN) -it -u $(shell id -u):$(shell id -g) --rm \
 			-e TARGET=$(TARGET) \
 			-e TARGET_TRIPLE=$(TARGET_TRIPLE) \
 			--mount type=bind,src=$(CURDIR),dst=$(CONTAINER_MNT),ro=false \
 			-w ${1} \
-			$(IMAGE_NAME):$(TARGET) /bin/bash -c "${2}"; \
+			firefox-builder:$(TARGET) /bin/bash -c "${2}"; \
 	fi
 endef
 
@@ -67,7 +67,7 @@ env:
 	@env
 
 clean: unpatch
-	-cd $(PDF_JS) 2> /dev/null && rm -rf build
+	-cd $(PDF_JS) 2> /dev/null && $(RM) -r build
 	$(call run,$(CONTAINER_MOZILLA),./mach clobber)
 
 distclean:

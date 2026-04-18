@@ -1,13 +1,13 @@
 MOZILLA_UNIFIED := $(CURDIR)/mozilla-unified
 MOZILLA_UNIFIED_URL := https://github.com/mozilla-firefox/firefox.git
-export MOZILLA_UNIFIED_REV ?= FIREFOX_147_0_3_RELEASE
+export MOZILLA_UNIFIED_REV ?= FIREFOX_150_0_BUILD1
 
 PDF_JS := $(CURDIR)/pdf.js
 PDF_JS_URL ?= https://codeberg.org/kafva/pdf.js
 PDF_JS_REV ?= 5a127574ea0b0b1550324e4f84ceebcd006ae019
 
 # https://firefox-source-docs.mozilla.org/writing-rust-code/update-policy.html
-RUST_VERSION = 1.90
+RUST_VERSION = 1.94
 
 # Target settings
 ifeq ($(TARGET),macos)
@@ -51,9 +51,13 @@ endif
 # Tag for new build
 TAG ?= $(shell date '+%Y.%m.%d')
 
+# Disable terminal-notifier and hide warnings from the build log.
+# Do not use MOZ_AUTOMATION, it has *many* other side-effects besides disabling
+# the terminal-notifier, we want a manually invoked ./mach to be as similar to
+# the ./mach we run in make as possible.
+export MOZ_NOSPAM = true
+
 export MOZ_PARALLEL_BUILD ?= $(shell nproc)
-# Avoid terminal-notifier call on completion
-export MOZ_AUTOMATION = 1
 # Need to be explicitly set for ./mach package stage on macOS(?)
 export MOZ_SOURCE_REPO = $(CURDIR)/mozilla-unified
 export MOZ_SOURCE_CHANGESET = $(MOZILLA_UNIFIED_REV)
@@ -62,11 +66,5 @@ export MH_BRANCH = $(MOZILLA_UNIFIED_REV)
 
 export OUT := $(CURDIR)/out/$(TARGET)
 
-# Container image name, different tags for different distros
-IMAGE_NAME := firefox-builder
-
 # Make sure rust toolchain is found
 export PATH := $(HOME)/.cargo/bin:$(PATH)
-
-# Extra arguments for clone
-export GIT_CLONE_ARGS ?=

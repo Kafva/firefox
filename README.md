@@ -20,6 +20,9 @@ To build for all platforms:
 make all
 ```
 
+Note: `make build` will not re-apply patches automatically, you need to run
+`make unpatch` or `make clean` for this to happen.
+
 ## Setup for macOS
 The macOS target can only be built from a macOS host. The default configuration
 in the repository compiles for arm64. You need at least 64 GB of disk. Setup
