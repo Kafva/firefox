@@ -9,22 +9,22 @@ endef
 # $1: Cwd to use
 # $2: Command line to execute
 define run
-	@if [ -z "$(TARGET)" ]; then \
-		echo "No TARGET set"; \
-		exit 1; \
-	elif [ "$(TARGET)" = macos ] || [ "$(TARGET)" = archlinux ]; then \
+	@if [ "$(TARGET)" = macos ]; then \
 		cd ${1} && ${2}; \
-	else \
+	elif [ "$(TARGET)" = linux ]; then \
 		$(CONTAINER_BUILD) \
 			--build-arg BUILDER_UID=$(shell id -u) \
 			--build-arg BUILDER_GID=$(shell id -g) \
-			-f docker/$(TARGET).dockerfile -t firefox-builder:$(TARGET) $(CURDIR); \
+			-f docker/ubuntu.dockerfile -t firefox-builder:ubuntu $(CURDIR); \
 		$(CONTAINER_RUN) -it -u $(shell id -u):$(shell id -g) --rm \
 			-e TARGET=$(TARGET) \
 			-e TARGET_TRIPLE=$(TARGET_TRIPLE) \
 			--mount type=bind,src=$(CURDIR),dst=$(CONTAINER_MNT),ro=false \
 			-w ${1} \
-			firefox-builder:$(TARGET) /bin/bash -c "${2}"; \
+			firefox-builder:ubuntu /bin/bash -c "${2}"; \
+	else \
+		echo "Unsupported TARGET"; \
+		exit 1; \
 	fi
 endef
 
@@ -42,11 +42,8 @@ ifeq ($(shell uname),Darwin)
 	$(MAKE) TARGET=macos clean
 	$(MAKE) TARGET=macos build
 endif
-	$(MAKE) TARGET=ubuntu clean
-	$(MAKE) TARGET=ubuntu build
-
-	$(MAKE) TARGET=archlinux clean
-	$(MAKE) TARGET=archlinux build
+	$(MAKE) TARGET=linux clean
+	$(MAKE) TARGET=linux build
 
 release:
 	git tag -f $(TAG)
@@ -57,8 +54,8 @@ release:
 	git push origin $(TAG)
 	@# Make sure release has been created server side
 	sleep 10
-	gh release create --notes-from-tag --title $(TAG) $(TAG) $(wildcard out/macos/*.dmg)
-	gh release upload $(TAG) $(wildcard out/*/*.tar.xz)
+	gh release create --notes-from-tag --title $(TAG) $(TAG) $(wildcard out/*.dmg)
+	gh release upload $(TAG) $(wildcard out/*.tar.xz)
 
 unpatch:
 	rm -f $(MOZILLA_UNIFIED)/.patched
@@ -110,21 +107,21 @@ $(MOZILLA_UNIFIED)/.patched: $(MOZILLA_UNIFIED)/.cloned $(PDF_JS)/build/mozcentr
 	touch $@
 
 _build: $(MOZILLA_UNIFIED)/.patched
-	$(call msg,Building target $(TARGET) $(TARGET_UNAME) $(TARGET_TRIPLE))
+	$(call msg,Building $(TARGET_TRIPLE))
 	@# Set rust toolchain version
 	rustup default $(RUST_VERSION)
 	@# Add our mozconfig
 	cp $(CURDIR)/conf/mozconfig $(MOZILLA_UNIFIED)/mozconfig
-	cat $(CURDIR)/conf/mozconfig_$(TARGET_UNAME) >> $(MOZILLA_UNIFIED)/mozconfig
+	cat $(CURDIR)/conf/mozconfig_$(TARGET) >> $(MOZILLA_UNIFIED)/mozconfig
 	echo "ac_add_options --target=$(TARGET_TRIPLE)" >> $(MOZILLA_UNIFIED)/mozconfig
 	cd $(MOZILLA_UNIFIED) && ./mach build
 	cd $(MOZILLA_UNIFIED) && ./mach package
-	mkdir -p $(OUT)
-ifeq ($(TARGET_UNAME),linux)
+	mkdir -p out
+ifeq ($(TARGET),linux)
 	cp $(MOZILLA_UNIFIED)/obj-*-linux-*/dist/firefox-*.linux-*.tar.xz \
-	   $(OUT)/$(MOZILLA_UNIFIED_REV)-$(TARGET)-$(TARGET_TRIPLE).tar.xz
-else ifeq ($(TARGET_UNAME),darwin)
-	cp $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*.en-US.mac.dmg $(OUT)/
+	   out/$(MOZILLA_UNIFIED_REV)-$(TARGET_TRIPLE).tar.xz
+else ifeq ($(TARGET),macos)
+	cp $(MOZILLA_UNIFIED)/obj-aarch64-apple-darwin/dist/firefox-*.en-US.mac.dmg out/
 endif
 	@# Restore default toolchain
 	rustup default stable

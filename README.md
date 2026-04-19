@@ -1,27 +1,22 @@
 # firefox
-Build Firefox with patches and a custom pdf.js version on Linux and macOS. To
-use your own patches, place them under `./patches` before starting the build.
+Build Firefox with patches and a custom pdf.js version for Linux and macOS.
 
-Supported `TARGET` values:
-* `macos`
-* `ubuntu`
-* `archlinux`
-
-The `TARGET_TRIPLE=` variable controls the target architecture, only
-`x86_64-linux-gnu` is tested to work for Linux.
+## Configuration
+* Set `TARGET` to `macos` or `linux`.
+* `TARGET_TRIPLE=` variable controls the target architecture.
+* Place patches under `./patches` before starting the build.
 
 To build for one platform:
 ```bash
-make TARGET=$TARGET build
+make TARGET=... build
 ```
 
-To build for all platforms:
-```bash
-make all
-```
+To reapply patches, use `make unpatch` and then rebuild.
 
-Note: `make build` will not re-apply patches automatically, you need to run
-`make unpatch` or `make clean` for this to happen.
+The Linux build is done on Ubuntu LTS, the output should also work somewhat on
+Arch Linux. Check out the Arch Linux
+[packaging](https://gitlab.archlinux.org/archlinux/packaging/packages/firefox)
+repository to see if there are any special hacks needed.
 
 ## Setup for macOS
 The macOS target can only be built from a macOS host. The default configuration
@@ -43,37 +38,6 @@ sudo xcodebuild -license
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew bundle install --file conf/Brewfile
-./scripts/rustup.sh
-```
-
-## Setup for Arch Linux
-The `archlinux` target is not built in a container, the benefits of
-reproducibility are not really applicable for a rolling release.
-
-```bash
-sudo pacman -Syu base-devel \
-                 clang \
-                 nodejs \
-                 npm \
-                 git \
-                 python \
-                 python-pip \
-                 curl \
-                 dbus-glib \
-                 gtk3 \
-                 pipewire-pulse \
-                 zip \
-                 make \
-                 ruby \
-                 ccache \
-                 cbindgen \
-                 lsb-release \
-                 llvm \
-                 lld \
-                 rsync \
-                 unzip \
-                 nasm
-
 ./scripts/rustup.sh
 ```
 

@@ -11,19 +11,14 @@ RUST_VERSION = 1.94
 
 # Target settings
 ifeq ($(TARGET),macos)
-export TARGET_UNAME := darwin
 export TARGET_TRIPLE ?= aarch64-apple-darwin
 # export LDFLAGS := -L/usr/local/opt/llvm/lib
 # export CPPFLAGS := -I/usr/local/opt/llvm/include
 export PATH := /usr/local/opt/llvm/bin:${PATH}
 
-else ifeq ($(TARGET),ubuntu)
-export TARGET_UNAME := linux
+else ifeq ($(TARGET),linux)
 export TARGET_TRIPLE ?= x86_64-linux-gnu
 
-else ifeq ($(TARGET),archlinux)
-export TARGET_UNAME := linux
-export TARGET_TRIPLE ?= x86_64-linux-gnu
 endif
 
 # Host settings
@@ -40,7 +35,7 @@ $(error Unsupported host platform)
 endif
 
 # Paths that differ depending on if we build inside our outside a container
-ifneq ($(findstring $(TARGET),macos archlinux),)
+ifeq ($(TARGET),macos)
 export CONTAINER_MNT = $(CURDIR)
 export CONTAINER_MOZILLA = $(MOZILLA_UNIFIED)
 else
@@ -51,10 +46,12 @@ endif
 # Tag for new build
 TAG ?= $(shell date '+%Y.%m.%d')
 
+export OUT := $(CURDIR)/out/$(TARGET)
+
 # Disable terminal-notifier and hide warnings from the build log.
 # Do not use MOZ_AUTOMATION, it has *many* other side-effects besides disabling
 # the terminal-notifier, we want a manually invoked ./mach to be as similar to
-# the ./mach we run in make as possible.
+# the ./mach we run here as possible.
 export MOZ_NOSPAM = true
 
 export MOZ_PARALLEL_BUILD ?= $(shell nproc)
@@ -63,8 +60,3 @@ export MOZ_SOURCE_REPO = $(CURDIR)/mozilla-unified
 export MOZ_SOURCE_CHANGESET = $(MOZILLA_UNIFIED_REV)
 export MOZ_BUILD_DATE = $(shell date '+%Y%m%d%H%M%S')
 export MH_BRANCH = $(MOZILLA_UNIFIED_REV)
-
-export OUT := $(CURDIR)/out/$(TARGET)
-
-# Make sure rust toolchain is found
-export PATH := $(HOME)/.cargo/bin:$(PATH)
