@@ -1,6 +1,8 @@
 # firefox
 Build Firefox with patches and a custom pdf.js version for Linux and macOS.
 
+Prebuilt releases can be found [here](https://github.com/Kafva/firefox/releases).
+
 ## Configuration
 * Set `TARGET` to `macos` or `linux`.
 * `TARGET_TRIPLE=` variable controls the target architecture.
