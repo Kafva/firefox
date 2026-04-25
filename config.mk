@@ -4,7 +4,7 @@ export MOZILLA_UNIFIED_REV ?= FIREFOX_150_0_BUILD1
 
 PDF_JS := $(CURDIR)/pdf.js
 PDF_JS_URL ?= https://codeberg.org/kafva/pdf.js
-PDF_JS_REV ?= 5a127574ea0b0b1550324e4f84ceebcd006ae019
+PDF_JS_REV ?= c97b89f37f15df8a5d61d38e3b7064d40d5a4276
 
 # https://firefox-source-docs.mozilla.org/writing-rust-code/update-policy.html
 RUST_VERSION = 1.94
