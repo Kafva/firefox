@@ -2,6 +2,28 @@ include config.mk
 
 .PHONY: build all source shell release unpatch patch
 
+MOZILLA_UNIFIED := $(CURDIR)/mozilla-unified
+PDF_JS := $(CURDIR)/pdf.js
+
+export OUT := $(CURDIR)/out/$(TARGET)
+
+ifeq ($(shell uname),Darwin)
+CONTAINER_BUILD = container build
+CONTAINER_RUN = container run
+else
+CONTAINER_BUILD = docker buildx build
+CONTAINER_RUN = docker run
+endif
+
+# Paths that differ depending on if we build inside our outside a container
+ifeq ($(TARGET),macos)
+export CONTAINER_MNT = $(CURDIR)
+export CONTAINER_MOZILLA = $(MOZILLA_UNIFIED)
+else
+export CONTAINER_MNT = /home/builder/firefox
+export CONTAINER_MOZILLA = $(CONTAINER_MNT)/mozilla-unified
+endif
+
 define msg
 	@printf "\033[3m>>>> $(1)\033[0m\n"
 endef
@@ -27,6 +49,8 @@ define run
 		exit 1; \
 	fi
 endef
+
+################################################################################
 
 source: $(MOZILLA_UNIFIED)/.cloned $(PDF_JS)/.cloned
 
@@ -70,7 +94,7 @@ clean: unpatch
 distclean:
 	rm -rf $(MOZILLA_UNIFIED) $(PDF_JS)
 
-### Firefox ####################################################################
+## Firefox #####################################################################
 $(MOZILLA_UNIFIED)/.cloned:
 	$(call msg,Fetching firefox source)
 	git clone $(GIT_CLONE_ARGS) $(MOZILLA_UNIFIED_URL) $(@D)
@@ -127,7 +151,7 @@ endif
 	rustup default stable
 	$(call msg,Done)
 
-### pdf.js #####################################################################
+## pdf.js ######################################################################
 $(PDF_JS)/.cloned:
 	git clone $(GIT_CLONE_ARGS) $(PDF_JS_URL) $(@D)
 	touch $@
