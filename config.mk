@@ -1,8 +1,8 @@
 MOZILLA_UNIFIED_URL := https://github.com/mozilla-firefox/firefox.git
-MOZILLA_UNIFIED_REV := FIREFOX_150_0_BUILD1
+MOZILLA_UNIFIED_REV := FIREFOX_NIGHTLY_154_END
 
 PDF_JS_URL := https://codeberg.org/kafva/pdf.js
-PDF_JS_REV := c97b89f37f15df8a5d61d38e3b7064d40d5a4276
+PDF_JS_REV := 314cdf40413b0520a4c8732e039f7339115217f0
 
 # https://firefox-source-docs.mozilla.org/writing-rust-code/update-policy.html
 RUST_VERSION = 1.94
