@@ -37,13 +37,13 @@ define run
 		$(CONTAINER_BUILD) \
 			--build-arg BUILDER_UID=$(shell id -u) \
 			--build-arg BUILDER_GID=$(shell id -g) \
-			-f docker/ubuntu.dockerfile -t firefox-builder:ubuntu $(CURDIR); \
+			-t firefox-builder $(CURDIR); \
 		$(CONTAINER_RUN) -it -u $(shell id -u):$(shell id -g) --rm \
 			-e TARGET=$(TARGET) \
 			-e TARGET_TRIPLE=$(TARGET_TRIPLE) \
 			--mount type=bind,src=$(CURDIR),dst=$(CONTAINER_MNT),ro=false \
 			-w ${1} \
-			firefox-builder:ubuntu /bin/bash -c "${2}"; \
+			firefox-builder /bin/bash -c "${2}"; \
 	else \
 		echo "Unsupported TARGET"; \
 		exit 1; \

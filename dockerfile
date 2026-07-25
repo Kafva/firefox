@@ -1,8 +1,9 @@
-FROM docker.io/ubuntu:24.04
+FROM docker.io/debian:trixie
 
 ARG BUILDER_UID=${BUILDER_UID:-1000}
 ARG BUILDER_GID=${BUILDER_GID:-1000}
 
+ENV TZ=UTC
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN <<EOF
@@ -17,6 +18,7 @@ apt-get install -y \
     nasm \
     zstd \
     m4 \
+    libclang-dev \
     libdbus-glib-1-dev \
     libx11-xcb-dev \
     libasound2-dev \
@@ -41,12 +43,10 @@ EOF
 RUN ln -fns /usr/bin/ccache /usr/sbin/ccache
 RUN ln -fns /usr/bin/make /usr/sbin/make
 
-# The nodejs version in 24.04 is too old
+# We need a newer nodejs version.
 RUN curl "https://nodejs.org/dist/v25.5.0/node-v25.5.0-linux-x64.tar.xz" | tar -xJf - -C /usr --strip-components=1
 
 # Create build user with matching UID/GID to outside user
-RUN userdel ubuntu
-RUN groupadd -g ${BUILDER_GID} _builder || :
 RUN useradd --uid ${BUILDER_UID} --gid ${BUILDER_GID} --create-home --shell /bin/bash builder
 # Make it easy to install more packages for debugging
 RUN echo "builder ALL=NOPASSWD: ALL" > /etc/sudoers.d/builder
