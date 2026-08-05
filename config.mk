@@ -1,5 +1,5 @@
 MOZILLA_UNIFIED_URL := https://github.com/mozilla-firefox/firefox.git
-MOZILLA_UNIFIED_REV := FIREFOX_NIGHTLY_154_END
+MOZILLA_UNIFIED_REV := FIREFOX_153_0_3_RELEASE
 
 PDF_JS_URL := https://codeberg.org/kafva/pdf.js
 PDF_JS_REV := 314cdf40413b0520a4c8732e039f7339115217f0
